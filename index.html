@@ -339,11 +339,17 @@
     .card-back-content .anki-employ b { color: var(--blue); }
     .card-back-content .irreg { color: var(--irregular); }
 
-    /* Result action row */
+    /* Result action row — fixée en bas d'écran */
     .result-actions {
       display: flex; gap: 10px;
-      margin-bottom: 14px;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      max-width: 480px; margin: 0 auto;
+      padding: 10px 16px 20px;
+      background: linear-gradient(transparent, var(--bg) 30%);
+      z-index: 10;
     }
+    /* Espace pour que le contenu ne passe pas sous la barre fixe */
+    #screen-result { padding-bottom: 90px; }
     .btn-difficult {
       flex: 1; padding: 14px;
       background: transparent;
