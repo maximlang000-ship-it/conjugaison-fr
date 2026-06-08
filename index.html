@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Conjugaison FR</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Conjugaison FR">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #263348;
+      --border: #334155;
+      --blue: #5b7fe8;
+      --blue-dim: rgba(91,127,232,0.15);
+      --blue-border: rgba(91,127,232,0.35);
+      --green: #22c55e;
+      --green-dim: rgba(34,197,94,0.1);
+      --green-border: rgba(34,197,94,0.4);
+      --red: #ef4444;
+      --red-dim: rgba(239,68,68,0.1);
+      --red-border: rgba(239,68,68,0.4);
+      --amber: #f59e0b;
+      --amber-dim: rgba(245,158,11,0.12);
+      --amber-border: rgba(245,158,11,0.4);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --irregular: #f87171;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100dvh;
+    }
+
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 16px 32px;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ──────────────────────────────────────────── */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 0 10px;
+    }
+    .header-title { font-size: 1rem; font-weight: 700; color: var(--blue); letter-spacing: 0.04em; }
+    .header-meta  { font-size: 0.85rem; color: var(--text-muted); }
+
+    .progress-bar {
+      height: 4px; background: var(--surface); border-radius: 2px;
+      margin-bottom: 18px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; background: var(--blue); border-radius: 2px;
+      transition: width 0.4s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ── QUESTION CARD ───────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 28px 24px 24px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .tense-chip {
+      display: inline-block;
+      background: var(--blue-dim);
+      color: var(--blue);
+      border: 1px solid var(--blue-border);
+      border-radius: 20px;
+      padding: 5px 16px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 18px;
+    }
+    .verb-name {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 10px;
+      line-height: 1.1;
+    }
+    .person-label {
+      display: inline-block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      margin-top: 4px;
+    }
+
+    /* ── SECTION LABEL ──────────────────────────────────── */
+    .section-label {
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    /* ── GROUP BUTTONS ──────────────────────────────────── */
+    .group-buttons {
+      display: flex; gap: 8px;
+      margin-bottom: 16px;
+    }
+    .btn-group {
+      flex: 1; padding: 12px 8px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      color: var(--text-muted);
+      font-size: 0.88rem; font-weight: 700;
+      cursor: pointer; text-align: center;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-group .group-sub {
+      display: block;
+      font-size: 0.72rem; font-weight: 400;
+      margin-top: 3px; color: var(--text-dim);
+    }
+    .btn-group.selected {
+      border-color: var(--blue);
+      background: var(--blue-dim);
+      color: var(--blue);
+    }
+    .btn-group.selected .group-sub { color: var(--blue); opacity: 0.7; }
+
+    /* ── INPUT ──────────────────────────────────────────── */
+    #answer-input {
+      width: 100%;
+      padding: 15px 16px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      color: var(--text);
+      font-size: 1.15rem;
+      font-family: inherit;
+      text-align: center;
+      outline: none;
+      margin-bottom: 10px;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    #answer-input:focus { border-color: var(--blue); }
+
+    /* ── ACCENT BUTTONS ─────────────────────────────────── */
+    .accents {
+      display: flex; flex-wrap: wrap;
+      gap: 6px; margin-bottom: 16px;
+      justify-content: center;
+    }
+    .btn-accent {
+      padding: 9px 11px; min-width: 40px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      cursor: pointer; text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-accent:active { background: var(--border); }
+
+    /* ── HELP PANEL ─────────────────────────────────────── */
+    .help-panel {
+      background: #0c1a35;
+      border: 1px solid var(--blue-border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: #cbd5e1;
+      display: none;
+      animation: slideDown 0.2s ease;
+    }
+    .help-panel.visible { display: block; }
+
+    .help-tense-title {
+      font-weight: 800; font-size: 0.95rem; color: var(--blue);
+      margin-bottom: 8px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--blue-border);
+    }
+    .help-employ { margin-bottom: 8px; color: #e2e8f0; }
+    .help-rule   { margin-bottom: 8px; color: var(--amber); font-size: 0.88rem; }
+    .help-ex {
+      font-style: italic; color: var(--text-muted);
+      font-size: 0.88rem; padding-left: 10px;
+      border-left: 2px solid var(--border);
+    }
+    .help-warning {
+      margin-top: 10px; padding: 6px 10px;
+      background: rgba(245,158,11,0.1);
+      border-left: 3px solid var(--amber);
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem; color: var(--amber);
+    }
+
+    @keyframes slideDown {
+      from { opacity:0; transform:translateY(-8px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── ACTION BUTTONS ─────────────────────────────────── */
+    .actions { display: flex; gap: 10px; }
+    .btn-help {
+      padding: 15px 18px;
+      background: transparent;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      color: var(--text-muted);
+      font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-validate {
+      flex: 1; padding: 15px;
+      background: var(--blue); border: none;
+      border-radius: 14px;
+      color: #fff; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: opacity 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-validate.inactive { opacity: 0.5; }
+    .btn-validate:not(.inactive):active { transform: scale(0.98); }
+
+    @keyframes pulseAmber {
+      0%,100% { border-color: var(--border); }
+      40%      { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,0.25); }
+    }
+    .group-buttons.pulse .btn-group:not(.selected) {
+      animation: pulseAmber 0.6s ease;
+    }
+
+    /* ── RESULT SCREEN ──────────────────────────────────── */
+    #screen-result { display: none; }
+
+    .result-badge {
+      text-align: center;
+      padding: 22px 20px 20px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+      font-size: 1.5rem; font-weight: 800;
+    }
+    .result-badge.correct   { background: var(--green-dim); border: 2px solid var(--green-border); color: var(--green); }
+    .result-badge.incorrect { background: var(--red-dim);   border: 2px solid var(--red-border);   color: var(--red); }
+    .result-badge .result-sub {
+      display: block; font-size: 0.85rem; font-weight: 400; margin-top: 4px; opacity: 0.8;
+    }
+
+    .result-block {
+      background: var(--surface); border-radius: 16px;
+      padding: 16px; margin-bottom: 12px;
+    }
+    .result-block-title {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 10px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .result-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 8px; padding: 6px 0;
+    }
+    .result-row + .result-row { border-top: 1px solid var(--border); }
+    .result-row-label { color: var(--text-dim); font-size: 0.88rem; }
+    .result-row-val   { font-weight: 700; font-size: 0.95rem; }
+    .ok { color: var(--green); }
+    .ko { color: var(--red); }
+
+    /* Group explanation */
+    .group-explain {
+      background: var(--surface2); border-radius: 12px;
+      padding: 12px 14px; margin-bottom: 12px;
+      font-size: 0.88rem; line-height: 1.55; color: #cbd5e1;
+    }
+    .group-explain-label { font-weight: 700; color: var(--blue); margin-bottom: 5px; font-size: 0.85rem; }
+
+    /* Tense explanation */
+    .tense-explain {
+      background: #0c1a35;
+      border: 1px solid var(--blue-border);
+      border-radius: 12px;
+      padding: 12px 14px; margin-bottom: 12px;
+      font-size: 0.88rem; line-height: 1.6; color: #cbd5e1;
+    }
+    .tense-explain .help-tense-title {
+      font-size: 0.88rem; margin-bottom: 6px; padding-bottom: 6px;
+    }
+
+    /* Card back */
+    .card-back-section {
+      background: var(--surface); border-radius: 16px;
+      padding: 20px; margin-bottom: 12px;
+    }
+    .card-back-title {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-back-content { font-size: 0.95rem; line-height: 1.7; color: #e2e8f0; }
+    .card-back-content table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+    .card-back-content td { padding: 5px 14px 5px 0; font-size: 0.98rem; }
+    .card-back-content b { font-weight: 800; }
+    .card-back-content .anki-tip { color: var(--text-muted); font-size: 0.87em; }
+    .card-back-content .anki-employ {
+      background: #0c1a35;
+      border-left: 3px solid var(--blue);
+      border-radius: 0 8px 8px 0;
+      padding: 8px 12px; margin: 10px 0;
+      font-size: 0.88em; color: #cbd5e1;
+    }
+    .card-back-content .anki-employ b { color: var(--blue); }
+    .card-back-content .irreg { color: var(--irregular); }
+
+    /* Result action row */
+    .result-actions {
+      display: flex; gap: 10px;
+      margin-bottom: 14px;
+    }
+    .btn-difficult {
+      flex: 1; padding: 14px;
+      background: transparent;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      color: var(--text-muted);
+      font-size: 0.95rem; font-weight: 700;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+    .btn-difficult.marked {
+      border-color: var(--amber-border);
+      background: var(--amber-dim);
+      color: var(--amber);
+    }
+    .btn-next {
+      flex: 2; padding: 14px;
+      background: var(--blue); border: none;
+      border-radius: 14px;
+      color: #fff; font-size: 1rem; font-weight: 700;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-next:active { transform: scale(0.98); }
+
+    /* ── FINAL SCREEN ───────────────────────────────────── */
+    #screen-final { display: none; }
+    .final-wrap { padding-top: 50px; text-align: center; }
+    .final-emoji       { font-size: 4rem; margin-bottom: 16px; }
+    .final-score-num   { font-size: 3rem; font-weight: 900; color: var(--blue); }
+    .final-score-denom { font-size: 1.2rem; color: var(--text-muted); }
+    .final-label       { color: var(--text-muted); margin: 8px 0 36px; font-size: 0.95rem; }
+
+    .final-list-box {
+      background: var(--surface); border-radius: 16px;
+      padding: 16px; margin-bottom: 14px; text-align: left;
+    }
+    .final-list-title { font-weight: 700; margin-bottom: 10px; }
+    .final-list-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 0; border-top: 1px solid var(--border);
+      font-size: 0.88rem; color: var(--text-muted);
+    }
+    .dot-red   { color: var(--red);   font-size: 1.1rem; line-height: 1.4; }
+    .dot-amber { color: var(--amber); font-size: 1.1rem; line-height: 1.4; }
+
+    .final-buttons { display: flex; flex-direction: column; gap: 10px; }
+    .btn-retry-failed {
+      width:100%; padding:15px;
+      background: var(--red); border:none;
+      border-radius:14px; color:#fff;
+      font-size:1rem; font-weight:700; cursor:pointer;
+    }
+    .btn-retry-diff {
+      width:100%; padding:15px;
+      background: var(--amber-dim);
+      border: 2px solid var(--amber-border);
+      border-radius:14px; color: var(--amber);
+      font-size:1rem; font-weight:700; cursor:pointer;
+    }
+    .btn-restart {
+      width:100%; padding:15px;
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius:14px; color: var(--text-muted);
+      font-size:1rem; font-weight:700; cursor:pointer;
+    }
+
+    /* ── SHAKE ──────────────────────────────────────────── */
+    @keyframes shake {
+      0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)}
+      40%{transform:translateX(6px)}   60%{transform:translateX(-4px)}
+      80%{transform:translateX(4px)}
+    }
+    .shake { animation: shake 0.4s ease; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══════════ QUIZ SCREEN ══════════ -->
+  <div id="screen-quiz">
+    <div class="header">
+      <span class="header-title">Conjugaison FR</span>
+      <span class="header-meta" id="card-counter">1 / 10</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+    <div class="card">
+      <div class="tense-chip" id="q-tense">Présent</div>
+      <div class="verb-name"  id="q-verb">Parler</div>
+      <div id="q-person-wrap">
+        <span class="person-label" id="q-person"></span>
+      </div>
+    </div>
+
+    <div class="section-label">Quel groupe ?</div>
+    <div class="group-buttons">
+      <button class="btn-group" id="grp-1" onclick="selectGroup(1)">
+        1<sup>er</sup><span class="group-sub">-er</span>
+      </button>
+      <button class="btn-group" id="grp-2" onclick="selectGroup(2)">
+        2<sup>ème</sup><span class="group-sub">-ir / -iss-</span>
+      </button>
+      <button class="btn-group" id="grp-3" onclick="selectGroup(3)">
+        3<sup>ème</sup><span class="group-sub">irréguliers</span>
+      </button>
+    </div>
+
+    <div class="section-label">Ta conjugaison</div>
+    <input type="text" id="answer-input"
+      placeholder="ex : nous finissons / j'aurai / qu'il vienne…"
+      autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+      oninput="checkCanValidate()"
+      onkeydown="if(event.key==='Enter')tryValidate()">
+
+    <div class="accents">
+      <button class="btn-accent" onclick="ins('é')">é</button>
+      <button class="btn-accent" onclick="ins('è')">è</button>
+      <button class="btn-accent" onclick="ins('ê')">ê</button>
+      <button class="btn-accent" onclick="ins('ë')">ë</button>
+      <button class="btn-accent" onclick="ins('à')">à</button>
+      <button class="btn-accent" onclick="ins('â')">â</button>
+      <button class="btn-accent" onclick="ins('î')">î</button>
+      <button class="btn-accent" onclick="ins('ô')">ô</button>
+      <button class="btn-accent" onclick="ins('û')">û</button>
+      <button class="btn-accent" onclick="ins('ù')">ù</button>
+      <button class="btn-accent" onclick="ins('ç')">ç</button>
+      <button class="btn-accent" onclick="ins('œ')">œ</button>
+    </div>
+
+    <div class="help-panel" id="help-panel"></div>
+
+    <div class="actions">
+      <button class="btn-help" onclick="toggleHelp()">💡 Aide</button>
+      <button class="btn-validate" id="btn-validate" onclick="tryValidate()">Valider</button>
+    </div>
+  </div>
+
+  <!-- ══════════ RESULT SCREEN ══════════ -->
+  <div id="screen-result">
+    <div class="header">
+      <span class="header-title">Conjugaison FR</span>
+      <span class="header-meta" id="res-counter">1 / 10</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill-2"></div></div>
+
+    <div class="result-badge" id="result-badge"></div>
+
+    <div class="result-block">
+      <div class="result-block-title">Résultat</div>
+      <div id="result-rows"></div>
+    </div>
+
+    <div class="tense-explain" id="tense-explain"></div>
+
+    <div class="group-explain" id="group-explain">
+      <div class="group-explain-label" id="group-explain-label">📚 Groupe</div>
+      <div id="group-explain-text"></div>
+    </div>
+
+    <div class="card-back-section">
+      <div class="card-back-title">Verso de la carte Anki</div>
+      <div class="card-back-content" id="card-back-content"></div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-difficult" id="btn-difficult" onclick="toggleDifficult()">⚑ Difficile</button>
+      <button class="btn-next" id="btn-next" onclick="nextCard()">→ Suivante</button>
+    </div>
+  </div>
+
+  <!-- ══════════ FINAL SCREEN ══════════ -->
+  <div id="screen-final">
+    <div class="final-wrap">
+      <div class="final-emoji" id="final-emoji">🎉</div>
+      <div>
+        <span class="final-score-num"   id="final-num">0</span>
+        <span class="final-score-denom" id="final-denom"> / 10 correctes</span>
+      </div>
+      <div class="final-label">accents compris</div>
+
+      <div class="final-list-box" id="failed-box" style="display:none">
+        <div class="final-list-title">❌ À revoir :</div>
+        <div id="failed-list"></div>
+      </div>
+
+      <div class="final-list-box" id="diff-box" style="display:none">
+        <div class="final-list-title">⚑ Marquées difficiles :</div>
+        <div id="diff-list"></div>
+      </div>
+
+      <div class="final-buttons">
+        <button class="btn-retry-failed" id="btn-retry-failed" style="display:none" onclick="retryFailed()">↩ Reprendre les ratées</button>
+        <button class="btn-retry-diff"   id="btn-retry-diff"   style="display:none" onclick="retryDifficult()">⚑ Réviser les difficiles</button>
+        <button class="btn-restart" onclick="restart()">↺ Tout recommencer (aléatoire)</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+
+// ════════════════════════════════════════════════════════
+//  AIDE PAR TEMPS
+// ════════════════════════════════════════════════════════
+
+const TENSE_HELP = {
+  "Présent": `
+    <div class="help-tense-title">Indicatif Présent ★★★</div>
+    <div class="help-employ">Action en cours, habituelle ou vérité générale.</div>
+    <div class="help-ex">Il rédige le rapport.<br>Je travaille tous les matins.<br>Le soleil se lève à l'est.</div>`,
+
+  "Imparfait": `
+    <div class="help-tense-title">Imparfait ★★★</div>
+    <div class="help-employ">Action passée <b>durable</b>, <b>habituelle</b> ou <b>descriptive</b>.</div>
+    <div class="help-ex">Il travaillait tous les soirs.<br>Quand j'étais enfant, je jouais dehors.</div>
+    <div class="help-rule">📌 Discours indirect : présent → imparfait</div>
+    <div class="help-ex">Il a dit qu'il <b>finissait</b>. (= « Je finis. »)</div>`,
+
+  "Futur simple": `
+    <div class="help-tense-title">Futur simple ★★</div>
+    <div class="help-employ">Action à venir, certaine ou planifiée.</div>
+    <div class="help-ex">Nous enverrons le dossier lundi.<br>Il sera en retard.</div>
+    <div class="help-rule">📌 si + présent → futur simple</div>
+    <div class="help-ex">Si tu travailles, tu <b>réussiras</b>.</div>
+    <div class="help-warning">⚠ Jamais : <i>si + futur</i></div>`,
+
+  "Passé simple": `
+    <div class="help-tense-title">Passé simple ★ (écrit soutenu)</div>
+    <div class="help-employ">Action passée <b>achevée et délimitée</b>, sans lien avec le présent.</div>
+    <div class="help-ex">Il prit la parole.<br>Elle annonça les résultats.</div>
+    <div class="help-rule">📌 Récits littéraires et historiques. À l'oral → passé composé.</div>`,
+
+  "Conditionnel présent": `
+    <div class="help-tense-title">Conditionnel présent ★★★</div>
+    <div class="help-employ">① <b>Hypothèse</b> (condition non réalisée)</div>
+    <div class="help-ex">Si tu travaillais davantage, tu <b>réussirais</b>.</div>
+    <div class="help-employ" style="margin-top:8px">② <b>Futur dans le passé</b></div>
+    <div class="help-ex">Il a dit qu'il <b>viendrait</b>.</div>
+    <div class="help-employ" style="margin-top:8px">③ <b>Politesse / atténuation</b></div>
+    <div class="help-ex">Je <b>voudrais</b> un renseignement.</div>
+    <div class="help-rule">📌 si + imparfait → conditionnel présent</div>
+    <div class="help-warning">⚠ Jamais : <i>si + conditionnel</i></div>`,
+
+  "Subjonctif présent": `
+    <div class="help-tense-title">Subjonctif présent ★★★</div>
+    <div class="help-employ">Mode du <b>possible et du virtuel</b> : souhait, doute, obligation, concession.</div>
+    <div class="help-rule">📌 Déclencheurs : <i>vouloir que, falloir que, bien que, pour que, avant que, à moins que…</i></div>
+    <div class="help-ex">Je veux qu'il <b>vienne</b>.<br>Il faut qu'elle <b>finisse</b>.<br>Bien qu'elle <b>soit</b> absente, le projet avance.</div>`,
+
+  "Impératif": `
+    <div class="help-tense-title">Impératif présent ★★★</div>
+    <div class="help-employ">Ordre, conseil, demande. <b>Pas de sujet exprimé.</b> 3 personnes : <b>tu · nous · vous</b></div>
+    <div class="help-ex">Parle ! Parlons ! Parlez !<br>Sois courageux ! Ayez confiance !</div>
+    <div class="help-rule">📌 Verbes en -er : pas de <b>-s</b> à la 2e pers. sg (sauf devant -y, -en)</div>
+    <div class="help-ex">Parle ! mais <i>Parles-en !</i></div>`,
+
+  "Participe présent": `
+    <div class="help-tense-title">Participe présent ★★</div>
+    <div class="help-employ">Forme <b>invariable</b> exprimant une action en cours.</div>
+    <div class="help-ex">Connaissant la route, il prit le raccourci.<br>Les élèves <b>ayant réussi</b> = <i>qui ont réussi</i></div>
+    <div class="help-rule">📌 ≠ adjectif verbal (qui s'accorde) : <i>une eau courante</i></div>`,
+
+  "Participe passé": `
+    <div class="help-tense-title">Participe passé ★★★</div>
+    <div class="help-employ">Base des <b>temps composés</b>.</div>
+    <div class="help-rule">📌 Accord :</div>
+    <div class="help-ex"><b>AVOIR</b> → accord avec le COD si antéposé<br><i>La lettre qu'il a <b>écrite</b>.</i><br><br><b>ÊTRE</b> → accord avec le sujet<br><i>Elle est <b>partie</b>. Ils sont <b>arrivés</b>.</i></div>`,
+
+  "Gérondif": `
+    <div class="help-tense-title">Gérondif ★★</div>
+    <div class="help-employ"><b>en + participe présent</b>. Toujours invariable.</div>
+    <div class="help-ex">① <b>Simultanéité</b> : Il chante <b>en travaillant</b>.<br>② <b>Moyen</b> : C'est <b>en forgeant</b> qu'on devient forgeron.<br>③ <b>Condition</b> : <b>En partant</b> tôt, tu éviteras les bouchons.</div>
+    <div class="help-rule">📌 Le sujet du gérondif = sujet principal de la phrase.</div>`
+};
+
+// ════════════════════════════════════════════════════════
+//  DONNÉES — 10 cartes prototype
+// ════════════════════════════════════════════════════════
+
+const CARDS = [
+  {
+    verb: "Parler", group: 1, tense: "Présent", person: "1re pers. du singulier", answer: "je parle",
+    groupName: "1er groupe",
+    groupExplain: "<b>Parler</b> appartient au <b>1er groupe</b> car son infinitif se termine en <b>-er</b> (à l'exception de <i>aller</i>). C'est le groupe le plus régulier : terminaisons prévisibles à tous les temps.",
+    cardBack: `<table>
+      <tr><td>je&nbsp;<b>parle</b></td><td>nous&nbsp;<b>parlons</b></td></tr>
+      <tr><td>tu&nbsp;<b>parles</b></td><td>vous&nbsp;<b>parlez</b></td></tr>
+      <tr><td>il&nbsp;<b>parle</b></td><td>ils&nbsp;<b>parlent</b></td></tr>
+    </table>
+    <span class="anki-tip">💡 Terminaisons : -e / -es / -e / -ons / -ez / -ent. Le -e final est muet.</span>`
+  },
+  {
+    verb: "Parler", group: 1, tense: "Imparfait", person: "2e pers. du pluriel", answer: "vous parliez",
+    groupName: "1er groupe",
+    groupExplain: "<b>Parler</b> est du <b>1er groupe</b> (-er). À l'imparfait, le radical est celui de <i>nous parlons</i> → <b>parl-</b>, avec les terminaisons universelles (-ais/-ais/-ait/-ions/-iez/-aient).",
+    cardBack: `<table>
+      <tr><td>je&nbsp;<b>parlais</b></td><td>nous&nbsp;<b>parlions</b></td></tr>
+      <tr><td>tu&nbsp;<b>parlais</b></td><td>vous&nbsp;<b>parliez</b></td></tr>
+      <tr><td>il&nbsp;<b>parlait</b></td><td>ils&nbsp;<b>parlaient</b></td></tr>
+    </table>
+    <span class="anki-tip">💡 Radical = nous présent sans -ons → <b>parl-</b>. Terminaisons identiques pour tous les verbes.</span>`
+  },
+  {
+    verb: "Finir", group: 2, tense: "Présent", person: "1re pers. du pluriel", answer: "nous finissons",
+    groupName: "2ème groupe",
+    groupExplain: "<b>Finir</b> appartient au <b>2ème groupe</b> : infinitif en <b>-ir</b> avec infixe <b>-iss-</b> au pluriel. Ne pas confondre avec <i>partir, sortir</i> (3ème groupe) qui n'ont pas cet infixe.",
+    cardBack: `<table>
+      <tr><td>je&nbsp;<b>finis</b></td><td>nous&nbsp;<b>finissons</b></td></tr>
+      <tr><td>tu&nbsp;<b>finis</b></td><td>vous&nbsp;<b>finissez</b></td></tr>
+      <tr><td>il&nbsp;<b>finit</b></td><td>ils&nbsp;<b>finissent</b></td></tr>
+    </table>
+    <span class="anki-tip">💡 Infixe <b>-iss-</b> au pluriel. Modèle : choisir, agir, réussir…</span>`
+  },
+  {
+    verb: "Finir", group: 2, tense: "Subjonctif présent", person: "3e pers. du singulier", answer: "qu'il finisse",
+    groupName: "2ème groupe",
+    groupExplain: "<b>Finir</b> est du <b>2ème groupe</b> (-ir avec -iss-). Au subjonctif présent, l'infixe -iss- se maintient sur toutes les personnes — caractéristique exclusive du 2ème groupe.",
+    cardBack: `<table>
+      <tr><td>que je&nbsp;<b>finisse</b></td><td>que nous&nbsp;<b>finissions</b></td></tr>
+      <tr><td>que tu&nbsp;<b>finisses</b></td><td>que vous&nbsp;<b>finissiez</b></td></tr>
+      <tr><td>qu'il&nbsp;<b>finisse</b></td><td>qu'ils&nbsp;<b>finissent</b></td></tr>
+    </table>
+    <div class="anki-employ"><b>Emploi :</b> Obligatoire après verbes de <b>volonté / doute / sentiment</b>, conjonctions <b>bien que / pour que / avant que</b>.</div>`
+  },
+  {
+    verb: "Être", group: 3, tense: "Présent", person: "3e pers. du pluriel", answer: "ils sont",
+    groupName: "3ème groupe",
+    groupExplain: "<b>Être</b> est au <b>3ème groupe</b> (verbes irréguliers). Ses formes sont entièrement supplétives (3 radicaux différents). À mémoriser comme bloc unique.",
+    cardBack: `<table>
+      <tr><td class="irreg">je&nbsp;<b>suis</b></td><td class="irreg">nous&nbsp;<b>sommes</b></td></tr>
+      <tr><td class="irreg">tu&nbsp;<b>es</b></td><td class="irreg">vous&nbsp;<b>êtes</b></td></tr>
+      <tr><td class="irreg">il&nbsp;<b>est</b></td><td class="irreg">ils&nbsp;<b>sont</b></td></tr>
+    </table>
+    <span class="anki-tip">💡 3 radicaux : sui-/es-/som-/êt-/son-. À mémoriser en bloc.</span>`
+  },
+  {
+    verb: "Avoir", group: 3, tense: "Futur simple", person: "1re pers. du singulier", answer: "j'aurai",
+    groupName: "3ème groupe",
+    groupExplain: "<b>Avoir</b> est au <b>3ème groupe</b> (irrégulier). Ses radicaux changent selon les temps : av- (imparfait), ai- (présent sg), <b>aur-</b> (futur), ay- (subjonctif). Auxiliaire fondamental.",
+    cardBack: `<table>
+      <tr><td class="irreg">j'&nbsp;<b>aurai</b></td><td class="irreg">nous&nbsp;<b>aurons</b></td></tr>
+      <tr><td class="irreg">tu&nbsp;<b>auras</b></td><td class="irreg">vous&nbsp;<b>aurez</b></td></tr>
+      <tr><td class="irreg">il&nbsp;<b>aura</b></td><td class="irreg">ils&nbsp;<b>auront</b></td></tr>
+    </table>
+    <span class="anki-tip">💡 Radical <b>aur-</b> — le -v- disparaît. ⚠ Ne pas écrire *j'averai.</span>`
+  },
+  {
+    verb: "Faire", group: 3, tense: "Passé simple", person: "3e pers. du singulier", answer: "il fit",
+    groupName: "3ème groupe",
+    groupExplain: "<b>Faire</b> est au <b>3ème groupe</b> (très irrégulier). Formes uniques : <i>vous faites, ils font</i> ; radical <i>fer-</i> au futur, <i>fass-</i> au subjonctif, <i>fi-</i> au passé simple.",
+    cardBack: `<table>
+      <tr><td class="irreg">je&nbsp;<b>fis</b></td><td class="irreg">nous&nbsp;<b>fîmes</b></td></tr>
+      <tr><td class="irreg">tu&nbsp;<b>fis</b></td><td class="irreg">vous&nbsp;<b>fîtes</b></td></tr>
+      <tr><td class="irreg">il&nbsp;<b>fit</b></td><td class="irreg">ils&nbsp;<b>firent</b></td></tr>
+    </table>
+    <div class="anki-employ"><b>Emploi :</b> Temps du récit <b>écrit</b>. Action achevée. À l'oral → passé composé.</div>
+    <span class="anki-tip">💡 Radical <b>fi-</b> + terminaisons en -i-.</span>`
+  },
+  {
+    verb: "Venir", group: 3, tense: "Conditionnel présent", person: "1re pers. du pluriel", answer: "nous viendrions",
+    groupName: "3ème groupe",
+    groupExplain: "<b>Venir</b> est au <b>3ème groupe</b> : malgré la terminaison -ir, il n'a pas d'infixe -iss- et son radical alterne (viens/venons, viendr- au futur/conditionnel). Modèle pour tenir, devenir, revenir…",
+    cardBack: `<table>
+      <tr><td class="irreg">je&nbsp;<b>viendrais</b></td><td class="irreg">nous&nbsp;<b>viendrions</b></td></tr>
+      <tr><td class="irreg">tu&nbsp;<b>viendrais</b></td><td class="irreg">vous&nbsp;<b>viendriez</b></td></tr>
+      <tr><td class="irreg">il&nbsp;<b>viendrait</b></td><td class="irreg">ils&nbsp;<b>viendraient</b></td></tr>
+    </table>
+    <div class="anki-employ"><b>Emploi :</b> ① Hypothèse (si + imparfait) ② Futur dans le passé ③ Politesse atténuée</div>`
+  },
+  {
+    verb: "Prendre", group: 3, tense: "Impératif", person: "2e pers. du pluriel", answer: "prenez",
+    groupName: "3ème groupe",
+    groupExplain: "<b>Prendre</b> est au <b>3ème groupe</b> (irrégulier). Son radical varie : <i>prend-</i> (sg), <i>pren-</i> (pl), <i>prenn-</i> (3e pl). Modèle pour apprendre, comprendre, reprendre…",
+    cardBack: `<b>prends</b>&nbsp;&nbsp;·&nbsp;&nbsp;<b>prenons</b>&nbsp;&nbsp;·&nbsp;&nbsp;<b>prenez</b><br><br>
+    <div class="anki-employ"><b>Emploi :</b> Ordre, conseil, demande. Pas de sujet. 3 personnes : tu / nous / vous.</div>
+    <span class="anki-tip">💡 2e sg : <b>prends</b> avec -ds (pas de -t, contrairement à <i>il prend</i>).</span>`
+  },
+  {
+    verb: "Voir", group: 3, tense: "Participe passé", person: null, answer: "vu",
+    groupName: "3ème groupe",
+    groupExplain: "<b>Voir</b> est au <b>3ème groupe</b> (irrégulier). Son radical alterne -oi-/-oy-, il double le -r au futur (<i>verrai</i>), et son participe passé est <b>vu</b> (forme courte irrégulière).",
+    cardBack: `<span class="irreg"><b>vu</b></span><br><br>
+    <span class="anki-tip">💡 Auxiliaire <b>avoir</b>. Accordé si COD antéposé : <i>la pièce qu'il a vue</i>.</span>`
+  }
+];
+
+// ════════════════════════════════════════════════════════
+//  CARTES DIFFICILES — persistance localStorage
+// ════════════════════════════════════════════════════════
+
+const LS_KEY = 'conjugaison_difficult';
+
+function cardId(c) {
+  return c.verb + '|' + c.tense + '|' + (c.person ?? '');
+}
+
+function loadDifficult() {
+  try { return new Set(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); }
+  catch { return new Set(); }
+}
+
+function saveDifficult(set) {
+  localStorage.setItem(LS_KEY, JSON.stringify([...set]));
+}
+
+let difficultIds = loadDifficult();
+
+// ════════════════════════════════════════════════════════
+//  ÉTAT
+// ════════════════════════════════════════════════════════
+
+let queue        = [];
+let current      = 0;
+let totalCards   = 0;
+let score        = 0;
+let failedCards  = [];
+let selectedGroup= null;
+let helpOpen     = false;
+
+// ════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function start(cards) {
+  queue        = shuffle(cards);
+  current      = 0;
+  totalCards   = queue.length;
+  score        = 0;
+  failedCards  = [];
+  selectedGroup= null;
+  helpOpen     = false;
+  showCard();
+}
+
+function restart()        { start(CARDS); }
+function retryFailed()    { start(failedCards.slice()); }
+function retryDifficult() {
+  const diff = CARDS.filter(c => difficultIds.has(cardId(c)));
+  if (diff.length > 0) start(diff);
+}
+
+// ════════════════════════════════════════════════════════
+//  AFFICHAGE CARTE
+// ════════════════════════════════════════════════════════
+
+function showCard() {
+  const c = queue[current];
+
+  selectedGroup = null;
+  helpOpen      = false;
+
+  const inp = document.getElementById('answer-input');
+  inp.value = '';
+  inp.classList.remove('shake');
+  document.getElementById('btn-validate').classList.add('inactive');
+  document.getElementById('help-panel').classList.remove('visible');
+  document.getElementById('help-panel').innerHTML = TENSE_HELP[c.tense] || '';
+
+  [1,2,3].forEach(g => document.getElementById('grp-'+g).classList.remove('selected'));
+
+  document.getElementById('q-tense').textContent = c.tense;
+  document.getElementById('q-verb').textContent  = c.verb;
+
+  const personWrap = document.getElementById('q-person-wrap');
+  if (c.person) {
+    personWrap.style.display = '';
+    document.getElementById('q-person').textContent = c.person;
+  } else {
+    personWrap.style.display = 'none';
+  }
+
+  updateProgress();
+  showScreen('screen-quiz');
+  setTimeout(() => inp.focus(), 50);
+}
+
+// ════════════════════════════════════════════════════════
+//  INTERACTIONS QUIZ
+// ════════════════════════════════════════════════════════
+
+function selectGroup(n) {
+  selectedGroup = n;
+  [1,2,3].forEach(g => document.getElementById('grp-'+g).classList.toggle('selected', g === n));
+  checkCanValidate();
+}
+
+function checkCanValidate() {
+  const hasText = document.getElementById('answer-input').value.trim().length > 0;
+  const ready   = hasText && selectedGroup !== null;
+  document.getElementById('btn-validate').classList.toggle('inactive', !ready);
+}
+
+function tryValidate() {
+  const hasText = document.getElementById('answer-input').value.trim().length > 0;
+  if (!hasText) {
+    const inp = document.getElementById('answer-input');
+    inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+    inp.focus();
+    return;
+  }
+  if (selectedGroup === null) {
+    const grpBtns = document.querySelector('.group-buttons');
+    grpBtns.classList.remove('pulse'); void grpBtns.offsetWidth; grpBtns.classList.add('pulse');
+    return;
+  }
+  validate();
+}
+
+function toggleHelp() {
+  helpOpen = !helpOpen;
+  document.getElementById('help-panel').classList.toggle('visible', helpOpen);
+}
+
+function ins(char) {
+  const inp   = document.getElementById('answer-input');
+  const s     = inp.selectionStart ?? inp.value.length;
+  const e     = inp.selectionEnd   ?? inp.value.length;
+  inp.value   = inp.value.slice(0, s) + char + inp.value.slice(e);
+  inp.setSelectionRange(s + 1, s + 1);
+  inp.focus();
+  checkCanValidate();
+}
+
+// ════════════════════════════════════════════════════════
+//  VALIDATION
+// ════════════════════════════════════════════════════════
+
+function validate() {
+  const c       = queue[current];
+  const userRaw = document.getElementById('answer-input').value.trim();
+  const norm = s => s.trim().toLowerCase().replace(/[‘’ʼ]/g, "'").replace(/\s+/g,' ');
+  const conjOk  = norm(userRaw) === norm(c.answer);
+  const groupOk = selectedGroup === c.group;
+
+  if (conjOk) score++;
+  else {
+    failedCards.push(c);
+    const inp = document.getElementById('answer-input');
+    inp.classList.remove('shake');
+    void inp.offsetWidth;
+    inp.classList.add('shake');
+  }
+
+  // Badge (basé sur la conjugaison)
+  const badge = document.getElementById('result-badge');
+  badge.className = 'result-badge ' + (conjOk ? 'correct' : 'incorrect');
+  badge.innerHTML = conjOk
+    ? '✓ Correct !'
+    : `✗ Incorrect<span class="result-sub">${userRaw} → <b>${c.answer}</b></span>`;
+
+  // Lignes résultat
+  const groupLabel = selectedGroup === 1 ? '1er' : selectedGroup + 'ème';
+  document.getElementById('result-rows').innerHTML = `
+    <div class="result-row">
+      <span class="result-row-label">Conjugaison</span>
+      <span class="result-row-val ${conjOk ? 'ok' : 'ko'}">
+        ${conjOk ? c.answer + ' ✓' : '<del>' + userRaw + '</del> → ' + c.answer}
+      </span>
+    </div>
+    <div class="result-row">
+      <span class="result-row-label">Groupe</span>
+      <span class="result-row-val ${groupOk ? 'ok' : 'ko'}">
+        ${groupOk ? c.groupName + ' ✓' : groupLabel + ' ✗ → ' + c.groupName}
+      </span>
+    </div>`;
+
+  // Emploi du temps
+  document.getElementById('tense-explain').innerHTML = TENSE_HELP[c.tense] || '';
+
+  // Explication groupe
+  document.getElementById('group-explain-label').textContent = '📚 ' + c.groupName;
+  document.getElementById('group-explain-text').innerHTML    = c.groupExplain;
+
+  // Verso Anki
+  document.getElementById('card-back-content').innerHTML = c.cardBack;
+
+  // Bouton Difficile
+  updateDifficultButton(difficultIds.has(cardId(c)));
+
+  // Progression
+  updateProgress();
+  document.getElementById('res-counter').textContent      = (current + 1) + ' / ' + totalCards;
+  document.getElementById('progress-fill-2').style.width = ((current + 1) / totalCards * 100) + '%';
+  document.getElementById('btn-next').textContent =
+    current + 1 >= totalCards ? '→ Résultats' : '→ Suivante';
+
+  showScreen('screen-result');
+}
+
+// ════════════════════════════════════════════════════════
+//  DIFFICILE
+// ════════════════════════════════════════════════════════
+
+function updateDifficultButton(marked) {
+  const btn = document.getElementById('btn-difficult');
+  btn.classList.toggle('marked', marked);
+  btn.textContent = marked ? '⚑ Difficile ✓' : '⚑ Difficile';
+}
+
+function toggleDifficult() {
+  const c  = queue[current];
+  const id = cardId(c);
+  if (difficultIds.has(id)) difficultIds.delete(id);
+  else                       difficultIds.add(id);
+  saveDifficult(difficultIds);
+  updateDifficultButton(difficultIds.has(id));
+}
+
+// ════════════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════════════
+
+function nextCard() {
+  current++;
+  if (current >= totalCards) showFinal();
+  else showCard();
+}
+
+function showFinal() {
+  document.getElementById('final-num').textContent   = score;
+  document.getElementById('final-denom').textContent = ' / ' + totalCards + ' correctes';
+
+  const ratio = score / totalCards;
+  document.getElementById('final-emoji').textContent =
+    ratio >= 0.9 ? '🎉' : ratio >= 0.7 ? '👏' : ratio >= 0.5 ? '💪' : '📚';
+
+  // Ratées
+  const failedBox  = document.getElementById('failed-box');
+  const btnFailed  = document.getElementById('btn-retry-failed');
+  if (failedCards.length > 0) {
+    failedBox.style.display = '';
+    btnFailed.style.display = '';
+    document.getElementById('failed-list').innerHTML = failedCards.map(c =>
+      `<div class="final-list-item">
+        <span class="dot-red">✗</span>
+        <span><b>${c.verb}</b> — ${c.tense}${c.person ? ' · ' + c.person : ''} → <b>${c.answer}</b></span>
+      </div>`).join('');
+  } else {
+    failedBox.style.display = 'none';
+    btnFailed.style.display = 'none';
+  }
+
+  // Difficiles (persistantes, indépendantes de la session)
+  const diffCards = CARDS.filter(c => difficultIds.has(cardId(c)));
+  const diffBox   = document.getElementById('diff-box');
+  const btnDiff   = document.getElementById('btn-retry-diff');
+  if (diffCards.length > 0) {
+    diffBox.style.display = '';
+    btnDiff.style.display = '';
+    document.getElementById('diff-list').innerHTML = diffCards.map(c =>
+      `<div class="final-list-item">
+        <span class="dot-amber">⚑</span>
+        <span><b>${c.verb}</b> — ${c.tense}${c.person ? ' · ' + c.person : ''}</span>
+      </div>`).join('');
+  } else {
+    diffBox.style.display = 'none';
+    btnDiff.style.display = 'none';
+  }
+
+  showScreen('screen-final');
+}
+
+// ════════════════════════════════════════════════════════
+//  UTILITAIRES
+// ════════════════════════════════════════════════════════
+
+function showScreen(id) {
+  ['screen-quiz','screen-result','screen-final'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? 'block' : 'none';
+  });
+  window.scrollTo(0, 0);
+}
+
+function updateProgress() {
+  document.getElementById('progress-fill').style.width = (current / totalCards * 100) + '%';
+  document.getElementById('card-counter').textContent  = (current + 1) + ' / ' + totalCards;
+}
+
+start(CARDS);
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+}
+</script>
+</body>
+</html>
