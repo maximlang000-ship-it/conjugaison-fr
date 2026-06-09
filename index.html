@@ -525,6 +525,24 @@
       cursor: pointer; padding: 2px 0;
     }
     .btn-back:hover { color: var(--blue); }
+
+    /* ── AUDIO BUTTONS ──────────────────────────────────── */
+    .audio-row {
+      display: flex; gap: 8px; margin-bottom: 14px;
+    }
+    .btn-audio {
+      flex: 1; padding: 10px 6px; border-radius: 12px;
+      font-size: 0.75rem; font-weight: 600; line-height: 1.3;
+      border: 1px solid var(--border);
+      background: var(--surface2); color: var(--text-muted);
+      cursor: pointer; transition: all 0.15s;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+    }
+    .btn-audio .aico { font-size: 1.15rem; line-height: 1; }
+    .btn-audio.playing {
+      background: var(--blue-dim); border-color: var(--blue-border); color: var(--blue);
+    }
+    .btn-audio:disabled { opacity: 0.3; cursor: default; }
   </style>
 </head>
 <body>
@@ -651,6 +669,19 @@
     <div class="progress-bar"><div class="progress-fill" id="progress-fill-2"></div></div>
 
     <div class="result-badge" id="result-badge"></div>
+
+
+    <div class="audio-row" id="audio-row">
+      <button class="btn-audio" id="tts-grp" onclick="speakGroupe()">
+        <span class="aico">🔊</span>Groupe
+      </button>
+      <button class="btn-audio" id="tts-tns" onclick="speakTense()">
+        <span class="aico">🔊</span>Temps
+      </button>
+      <button class="btn-audio" id="tts-vrb" onclick="speakVerbe()">
+        <span class="aico">🔊</span>Verbe conjugué
+      </button>
+    </div>
 
     <div class="result-block">
       <div class="result-block-title">Résultat</div>
@@ -804,6 +835,69 @@ function loadStats() {
   catch { return {}; }
 }
 function saveStats(s) { localStorage.setItem(LS_STATS, JSON.stringify(s)); }
+
+// ════════════════════════════════════════════════════════
+//  AUDIO / TTS
+// ════════════════════════════════════════════════════════
+
+// Texts set on each validation — edit here when finalising wording
+let ttsGroupe = '';
+let ttsTense  = '';
+let ttsVerbe  = '';
+
+let _ttsBtn = null;
+
+function _stripHtml(html) {
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  return (d.textContent || d.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+function speak(text, btnId) {
+  if (!window.speechSynthesis || !text) return;
+  const btn = document.getElementById(btnId);
+
+  // Toggle off if same button is playing
+  if (_ttsBtn === btn) {
+    window.speechSynthesis.cancel();
+    btn.classList.remove('playing');
+    _ttsBtn = null;
+    return;
+  }
+
+  // Stop previous
+  window.speechSynthesis.cancel();
+  if (_ttsBtn) { _ttsBtn.classList.remove('playing'); }
+
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang  = 'fr-FR';
+  u.rate  = 0.88;
+  u.onstart = () => { btn.classList.add('playing'); _ttsBtn = btn; };
+  u.onend   = () => { btn.classList.remove('playing'); _ttsBtn = null; };
+  u.onerror = () => { btn.classList.remove('playing'); _ttsBtn = null; };
+  window.speechSynthesis.speak(u);
+}
+
+function speakGroupe() { speak(ttsGroupe, 'tts-grp'); }
+function speakTense()  { speak(ttsTense,  'tts-tns'); }
+function speakVerbe()  { speak(ttsVerbe,  'tts-vrb'); }
+
+function _resetTts() {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  if (_ttsBtn) { _ttsBtn.classList.remove('playing'); _ttsBtn = null; }
+}
+
+// Hide audio row if TTS not supported
+(function() {
+  if (!window.speechSynthesis) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const r = document.getElementById('audio-row');
+      if (r) r.style.display = 'none';
+    });
+  }
+})();
+
+
 
 function recordResult(card, isOk) {
   const s = loadStats();
@@ -974,6 +1068,7 @@ function showCard() {
   const c = queue[current];
 
   selectedGroup = null;
+  _resetTts();
   helpOpen      = false;
 
   const inp = document.getElementById('answer-input');
@@ -1059,7 +1154,13 @@ function validate() {
   const conjOk  = norm(userRaw) === norm(c.answer);
   const groupOk = selectedGroup === c.group;
 
-  recordResult(c, conjOk);
+  // ── TTS texts (edit wording here) ──────────────────────
+  ttsGroupe = _stripHtml(c.groupExplain);
+  ttsTense  = _stripHtml(TENSE_HELP[c.tense] || c.tense);
+  ttsVerbe  = c.answer;
+  _resetTts();
+
+    recordResult(c, conjOk);
   if (conjOk) score++;
   else {
     failedCards.push(c);
