@@ -425,15 +425,168 @@
       80%{transform:translateX(4px)}
     }
     .shake { animation: shake 0.4s ease; }
+
+    /* ── SELECT SCREEN ──────────────────────────────────── */
+    #screen-select { padding-bottom: 110px; }
+
+    .stats-box, .filter-box {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .box-title {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 10px;
+    }
+    .box-title + .box-title { margin-top: 14px; }
+
+    /* stat rows */
+    .stat-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 7px; font-size: 0.82rem;
+    }
+    .stat-label {
+      width: 108px; flex-shrink: 0; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .stat-bar-wrap {
+      flex: 1; height: 5px; background: var(--surface2);
+      border-radius: 3px; overflow: hidden;
+    }
+    .stat-bar { height: 100%; border-radius: 3px; transition: width 0.5s; }
+    .stat-bar.g { background: var(--green); }
+    .stat-bar.a { background: var(--amber); }
+    .stat-bar.r { background: var(--red);   }
+    .stat-pct { font-size: 0.75rem; color: var(--text-muted); width: 32px; text-align: right; flex-shrink: 0; }
+    .no-data  { font-size: 0.8rem; color: var(--text-dim); padding: 4px 0; }
+
+    /* filter chips */
+    .chip-group { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip {
+      padding: 5px 12px; border-radius: 20px;
+      font-size: 0.78rem; font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--surface2); color: var(--text-muted);
+      cursor: pointer; transition: all 0.15s; user-select: none;
+    }
+    .chip.on {
+      background: var(--blue-dim); border-color: var(--blue-border); color: var(--blue);
+    }
+
+    /* group filter row */
+    .grp-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .btn-gf {
+      flex: 1; padding: 8px 2px; border-radius: 10px;
+      font-size: 0.8rem; font-weight: 600; text-align: center;
+      border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-gf.on { background: var(--blue-dim); border-color: var(--blue-border); color: var(--blue); }
+
+    /* toggle switch */
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between; padding-top: 2px;
+    }
+    .toggle-label { font-size: 0.86rem; color: var(--text); }
+    .sw { position: relative; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0; }
+    .sw input { opacity: 0; width: 0; height: 0; }
+    .sw-slider {
+      position: absolute; inset: 0; background: var(--surface2);
+      border-radius: 24px; border: 1px solid var(--border); transition: 0.2s;
+    }
+    .sw-slider::before {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; left: 2px; top: 2px;
+      background: var(--text-muted); border-radius: 50%; transition: 0.2s;
+    }
+    .sw input:checked + .sw-slider { background: var(--blue-dim); border-color: var(--blue); }
+    .sw input:checked + .sw-slider::before { transform: translateX(20px); background: var(--blue); }
+
+    /* footer bar */
+    .select-footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      max-width: 480px; margin: 0 auto;
+      padding: 10px 16px 22px;
+      background: linear-gradient(transparent, var(--bg) 28%);
+      z-index: 10; display: flex; align-items: center; gap: 12px;
+    }
+    .sel-count { flex: 1; font-size: 0.84rem; color: var(--text-muted); }
+    .btn-launch {
+      background: var(--blue); color: #fff; border: none;
+      border-radius: 14px; padding: 14px 26px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+    }
+    .btn-launch:disabled { opacity: 0.38; cursor: default; }
+
+    /* back button in quiz/final header */
+    .btn-back {
+      font-size: 0.8rem; color: var(--text-muted); background: none; border: none;
+      cursor: pointer; padding: 2px 0;
+    }
+    .btn-back:hover { color: var(--blue); }
   </style>
 </head>
 <body>
 <div id="app">
 
+
+  <!-- ══════════ SELECT SCREEN ══════════ -->
+  <div id="screen-select">
+    <div class="header">
+      <span class="header-title">Conjugaison FR</span>
+      <span class="header-meta" id="sel-total">— cartes</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-box">
+      <div class="box-title">Points faibles — par temps</div>
+      <div id="stat-rows-tense"><div class="no-data">Lance quelques cartes pour voir tes stats !</div></div>
+      <div class="box-title" style="margin-top:14px">Points faibles — par verbe</div>
+      <div id="stat-rows-verb"><div class="no-data">Lance quelques cartes pour voir tes stats !</div></div>
+    </div>
+
+    <!-- Filter : temps -->
+    <div class="filter-box">
+      <div class="box-title">Filtrer par temps</div>
+      <div class="chip-group" id="chips-tense"></div>
+    </div>
+
+    <!-- Filter : verbes -->
+    <div class="filter-box">
+      <div class="box-title">Filtrer par verbe</div>
+      <div class="chip-group" id="chips-verb"></div>
+    </div>
+
+    <!-- Filter : groupe + difficile -->
+    <div class="filter-box">
+      <div class="box-title">Groupe</div>
+      <div class="grp-row">
+        <button class="btn-gf on" id="gf0" onclick="setGrpFilter(0)">Tous</button>
+        <button class="btn-gf"    id="gf1" onclick="setGrpFilter(1)">1<sup>er</sup></button>
+        <button class="btn-gf"    id="gf2" onclick="setGrpFilter(2)">2<sup>ème</sup></button>
+        <button class="btn-gf"    id="gf3" onclick="setGrpFilter(3)">3<sup>ème</sup></button>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">⚑ Difficiles seulement</span>
+        <label class="sw">
+          <input type="checkbox" id="sw-diff" onchange="updateSelCount()">
+          <span class="sw-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="select-footer">
+      <span class="sel-count" id="sel-count">— cartes</span>
+      <button class="btn-launch" id="btn-launch" onclick="launchQuiz()">Lancer →</button>
+    </div>
+  </div>
+
   <!-- ══════════ QUIZ SCREEN ══════════ -->
   <div id="screen-quiz">
     <div class="header">
       <span class="header-title">Conjugaison FR</span>
+      <button class="btn-back" onclick="showSelect()">← Filtres</button>
       <span class="header-meta" id="card-counter">1 / 10</span>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
@@ -545,7 +698,7 @@
       <div class="final-buttons">
         <button class="btn-retry-failed" id="btn-retry-failed" style="display:none" onclick="retryFailed()">↩ Reprendre les ratées</button>
         <button class="btn-retry-diff"   id="btn-retry-diff"   style="display:none" onclick="retryDifficult()">⚑ Réviser les difficiles</button>
-        <button class="btn-restart" onclick="restart()">↺ Tout recommencer (aléatoire)</button>
+        <button class="btn-restart" onclick="restart()">⚙ Changer les filtres</button>
       </div>
     </div>
   </div>
@@ -640,6 +793,121 @@ const CARDS = [{"verb": "Parler", "group": 1, "tense": "Présent", "person": "1r
 
 const LS_KEY = 'conjugaison_difficult';
 
+// ════════════════════════════════════════════════════════
+//  STATS PERFORMANCE
+// ════════════════════════════════════════════════════════
+
+const LS_STATS = 'conjugaison_stats';
+
+function loadStats() {
+  try { return JSON.parse(localStorage.getItem(LS_STATS) || '{}'); }
+  catch { return {}; }
+}
+function saveStats(s) { localStorage.setItem(LS_STATS, JSON.stringify(s)); }
+
+function recordResult(card, isOk) {
+  const s = loadStats();
+  if (!s.tense) s.tense = {};
+  if (!s.verb)  s.verb  = {};
+  const t = card.tense, v = card.verb;
+  if (!s.tense[t]) s.tense[t] = {ok:0, n:0};
+  if (!s.verb[v])  s.verb[v]  = {ok:0, n:0};
+  s.tense[t].n++; if (isOk) s.tense[t].ok++;
+  s.verb[v].n++;  if (isOk) s.verb[v].ok++;
+  saveStats(s);
+}
+
+// ════════════════════════════════════════════════════════
+//  SELECTION SCREEN
+// ════════════════════════════════════════════════════════
+
+const ALL_TENSES = [...new Set(CARDS.map(c => c.tense))];
+const ALL_VERBS  = [...new Set(CARDS.map(c => c.verb))];
+
+let selTenses = new Set(ALL_TENSES);
+let selVerbs  = new Set(ALL_VERBS);
+let selGrp    = 0;
+
+function showSelect() {
+  renderStatBlock('stat-rows-tense', loadStats().tense, ALL_TENSES);
+  renderStatBlock('stat-rows-verb',  loadStats().verb,  ALL_VERBS);
+  buildChips('chips-tense', ALL_TENSES, selTenses, 'T');
+  buildChips('chips-verb',  ALL_VERBS,  selVerbs,  'V');
+  updateSelCount();
+  showScreen('screen-select');
+}
+
+function renderStatBlock(elId, data, allKeys) {
+  const el = document.getElementById(elId);
+  if (!data || !Object.keys(data).length) {
+    el.innerHTML = '<div class="no-data">Aucune donnée encore</div>'; return;
+  }
+  const rows = allKeys
+    .filter(k => data[k] && data[k].n > 0)
+    .map(k => ({k, pct: data[k].ok / data[k].n, ok: data[k].ok, n: data[k].n}))
+    .sort((a, b) => a.pct - b.pct);
+  if (!rows.length) { el.innerHTML = '<div class="no-data">Aucune donnée encore</div>'; return; }
+  el.innerHTML = rows.map(r => {
+    const p = Math.round(r.pct * 100);
+    const cls = p >= 80 ? 'g' : p >= 50 ? 'a' : 'r';
+    return `<div class="stat-row">
+      <span class="stat-label" title="${r.k}">${r.k}</span>
+      <div class="stat-bar-wrap"><div class="stat-bar ${cls}" style="width:${p}%"></div></div>
+      <span class="stat-pct">${p}%</span>
+    </div>`;
+  }).join('');
+}
+
+function buildChips(elId, all, selSet, prefix) {
+  document.getElementById(elId).innerHTML = all.map(v => {
+    const on = selSet.has(v);
+    const ev = v.replace(/'/g, "\\'");
+    return `<button class="chip${on?' on':''}" onclick="toggleChip('${ev}','${prefix}')">${v}</button>`;
+  }).join('');
+}
+
+function toggleChip(val, prefix) {
+  const set  = prefix === 'T' ? selTenses : selVerbs;
+  const all  = prefix === 'T' ? ALL_TENSES : ALL_VERBS;
+  const elId = prefix === 'T' ? 'chips-tense' : 'chips-verb';
+  if (set.has(val)) { if (set.size > 1) set.delete(val); }
+  else set.add(val);
+  buildChips(elId, all, set, prefix);
+  updateSelCount();
+}
+
+function setGrpFilter(g) {
+  selGrp = g;
+  [0,1,2,3].forEach(i => document.getElementById('gf'+i).classList.toggle('on', i===g));
+  updateSelCount();
+}
+
+function getFilteredCards() {
+  const diffOnly = document.getElementById('sw-diff').checked;
+  return CARDS.filter(c =>
+    selTenses.has(c.tense) &&
+    selVerbs.has(c.verb) &&
+    (selGrp === 0 || c.group === selGrp) &&
+    (!diffOnly || difficultIds.has(cardId(c)))
+  );
+}
+
+function updateSelCount() {
+  const n = getFilteredCards().length;
+  const txt = n + ' carte' + (n !== 1 ? 's' : '');
+  document.getElementById('sel-count').textContent = txt;
+  document.getElementById('sel-total').textContent = txt;
+  document.getElementById('btn-launch').disabled = n === 0;
+}
+
+function launchQuiz() {
+  const cards = getFilteredCards();
+  if (!cards.length) return;
+  start(cards);
+}
+
+
+
 function cardId(c) {
   return c.verb + '|' + c.tense + '|' + (c.person ?? '');
 }
@@ -691,7 +959,7 @@ function start(cards) {
   showCard();
 }
 
-function restart()        { start(CARDS); }
+function restart()        { showSelect(); }
 function retryFailed()    { start(failedCards.slice()); }
 function retryDifficult() {
   const diff = CARDS.filter(c => difficultIds.has(cardId(c)));
@@ -791,6 +1059,7 @@ function validate() {
   const conjOk  = norm(userRaw) === norm(c.answer);
   const groupOk = selectedGroup === c.group;
 
+  recordResult(c, conjOk);
   if (conjOk) score++;
   else {
     failedCards.push(c);
@@ -924,7 +1193,7 @@ function showFinal() {
 // ════════════════════════════════════════════════════════
 
 function showScreen(id) {
-  ['screen-quiz','screen-result','screen-final'].forEach(s => {
+  ['screen-select','screen-quiz','screen-result','screen-final'].forEach(s => {
     document.getElementById(s).style.display = s === id ? 'block' : 'none';
   });
   window.scrollTo(0, 0);
@@ -935,7 +1204,7 @@ function updateProgress() {
   document.getElementById('card-counter').textContent  = (current + 1) + ' / ' + totalCards;
 }
 
-start(CARDS);
+showSelect();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
