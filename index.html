@@ -543,6 +543,43 @@
       background: var(--blue-dim); border-color: var(--blue-border); color: var(--blue);
     }
     .btn-audio:disabled { opacity: 0.3; cursor: default; }
+
+    /* ══ COMPACT QUIZ SCREEN (Pixel mobile) ══════════════════
+       Réduit tous les espacements verticaux pour tenir en 1 écran
+       sans défilement, même avec le clavier ouvert.              */
+
+    /* Header + progress */
+    #screen-quiz .header          { padding: 10px 0 6px; }
+    #screen-quiz .progress-bar    { margin-bottom: 10px; }
+
+    /* Carte question */
+    #screen-quiz .card            { padding: 14px 20px 12px; margin-bottom: 10px; }
+    #screen-quiz .tense-chip      { padding: 3px 12px; margin-bottom: 10px; font-size: 0.72rem; }
+    #screen-quiz .verb-name       { font-size: 2rem; margin-bottom: 6px; }
+    #screen-quiz .person-label    { padding: 3px 12px; font-size: 0.82rem; margin-top: 2px; }
+
+    /* Labels de section */
+    #screen-quiz .section-label   { margin-bottom: 5px; }
+
+    /* Boutons de groupe */
+    #screen-quiz .group-buttons   { margin-bottom: 8px; gap: 6px; }
+    #screen-quiz .btn-group       { padding: 8px 6px; border-radius: 12px; font-size: 0.82rem; }
+    #screen-quiz .btn-group .group-sub { font-size: 0.68rem; margin-top: 2px; }
+
+    /* Input */
+    #screen-quiz #answer-input    { padding: 10px 14px; margin-bottom: 8px; font-size: 1.05rem; }
+
+    /* Accents */
+    #screen-quiz .accents         { gap: 5px; margin-bottom: 10px; }
+    #screen-quiz .btn-accent      { padding: 6px 9px; min-width: 36px; font-size: 0.95rem; border-radius: 8px; }
+
+    /* Boutons Aide + Valider */
+    #screen-quiz .actions         { gap: 8px; }
+    #screen-quiz .btn-help        { padding: 11px 14px; font-size: 0.88rem; }
+    #screen-quiz .btn-validate    { padding: 11px; font-size: 0.95rem; }
+
+    /* Supprimer le padding-bottom de #app sur l'écran quiz */
+    #screen-quiz                  { padding-bottom: 0; }
   </style>
 </head>
 <body>
@@ -870,8 +907,12 @@ function speak(text, btnId) {
   if (_ttsBtn) { _ttsBtn.classList.remove('playing'); }
 
   const u = new SpeechSynthesisUtterance(text);
-  u.lang  = 'fr-FR';
-  u.rate  = 0.88;
+  u.lang = 'fr-FR';
+  u.rate = 0.88;
+  // Force French voice if available
+  const _voices = window.speechSynthesis.getVoices();
+  const _fr = _voices.find(v => v.lang === 'fr-FR') || _voices.find(v => v.lang.startsWith('fr'));
+  if (_fr) u.voice = _fr;
   u.onstart = () => { btn.classList.add('playing'); _ttsBtn = btn; };
   u.onend   = () => { btn.classList.remove('playing'); _ttsBtn = null; };
   u.onerror = () => { btn.classList.remove('playing'); _ttsBtn = null; };
