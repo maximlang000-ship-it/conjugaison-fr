@@ -580,6 +580,30 @@
 
     /* Supprimer le padding-bottom de #app sur l'écran quiz */
     #screen-quiz                  { padding-bottom: 0; }
+
+    /* ── PIÈGES ──────────────────────────────────────────── */
+    .piege-badge {
+      display: inline-block; margin-top: 6px;
+      padding: 3px 11px; border-radius: 20px;
+      font-size: 0.7rem; font-weight: 700;
+      background: rgba(245,158,11,0.12); border: 1px solid var(--amber);
+      color: var(--amber);
+    }
+    .piege-box {
+      background: rgba(245,158,11,0.08);
+      border: 1px solid var(--amber);
+      border-left: 4px solid var(--amber);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      font-size: 0.88rem; line-height: 1.5;
+      color: #fde9c8;
+    }
+    .piege-box-label {
+      font-weight: 800; color: var(--amber);
+      margin-bottom: 4px; font-size: 0.8rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
   </style>
 </head>
 <body>
@@ -629,6 +653,13 @@
           <span class="sw-slider"></span>
         </label>
       </div>
+      <div class="toggle-row" style="margin-top:10px">
+        <span class="toggle-label">⚠️ Pièges fréquents seulement</span>
+        <label class="sw">
+          <input type="checkbox" id="sw-piege" onchange="updateSelCount()">
+          <span class="sw-slider"></span>
+        </label>
+      </div>
     </div>
 
     <div class="select-footer">
@@ -652,6 +683,7 @@
       <div id="q-person-wrap">
         <span class="person-label" id="q-person"></span>
       </div>
+      <div class="piege-badge" id="q-piege-badge" style="display:none">⚠️ Piège fréquent</div>
     </div>
 
     <div class="section-label">Quel groupe ?</div>
@@ -707,6 +739,10 @@
 
     <div class="result-badge" id="result-badge"></div>
 
+    <div class="piege-box" id="piege-box" style="display:none">
+      <div class="piege-box-label">⚠️ Piège fréquent</div>
+      <div id="piege-box-text"></div>
+    </div>
 
     <div class="audio-row" id="audio-row">
       <button class="btn-audio" id="tts-grp" onclick="speakGroupe()">
@@ -959,6 +995,93 @@ function recordResult(card, isOk) {
 const ALL_TENSES = [...new Set(CARDS.map(c => c.tense))];
 const ALL_VERBS  = [...new Set(CARDS.map(c => c.verb))];
 
+// ════════════════════════════════════════════════════════
+//  PIÈGES FRÉQUENTS
+// ════════════════════════════════════════════════════════
+
+const PIEGES = [
+  { verb:'Avoir', tense:'Présent', person:'3e pers. du singulier',
+    tip:`<b>« il a »</b> s'écrit sans accent — ne pas confondre avec la préposition « à ».` },
+  { verb:'Avoir', tense:'Subjonctif présent', person:'3e pers. du singulier',
+    tip:`<b>« qu'il ait »</b> se prononce comme « il est » mais s'écrit très différemment (subjonctif irrégulier).` },
+  { verb:'Être', tense:'Présent', person:'3e pers. du singulier',
+    tip:`<b>« il est »</b> se prononce comme « il a » (avoir) — bien distinguer les deux à l'écrit.` },
+  { verb:'Être', tense:'Subjonctif présent',
+    tip:`Radical totalement irrégulier : <b>sois / soyons / soyez</b> (et non « êt- »).` },
+  { verb:'Aller', tense:'Présent',
+    tip:`Verbe en <b>-er</b> mais conjugaison totalement irrégulière : je <b>vais</b>, tu <b>vas</b>, il <b>va</b>, nous allons, vous allez, ils <b>vont</b>.` },
+  { verb:'Aller', tense:'Futur simple',
+    tip:`Radical irrégulier <b>ir-</b> (et non « aller- ») : j'<b>irai</b>, tu iras…` },
+  { verb:'Aller', tense:'Conditionnel présent',
+    tip:`Même radical irrégulier qu'au futur : j'<b>irais</b> (et non « j'allerais »).` },
+  { verb:'Aller', tense:'Subjonctif présent', person:'1re pers. du pluriel',
+    tip:`« que nous <b>allions</b> » — radical all- aux 1ʳᵉ/2ᵉ pers. du pluriel, mais aill- ailleurs (que j'aille).` },
+  { verb:'Aller', tense:'Subjonctif présent', person:'2e pers. du pluriel',
+    tip:`« que vous <b>alliez</b> » — radical all- aux 1ʳᵉ/2ᵉ pers. du pluriel, mais aill- ailleurs (que j'aille).` },
+  { verb:'Aller', tense:'Subjonctif présent', person:'1re pers. du singulier',
+    tip:`« que j'<b>aille</b> » — radical aill-, différent de nous/vous (all-).` },
+  { verb:'Venir', tense:'Futur simple',
+    tip:`Radical irrégulier <b>viendr-</b> (et non « venir- ») : je <b>viendrai</b>, tu viendras…` },
+  { verb:'Venir', tense:'Conditionnel présent',
+    tip:`Même radical irrégulier qu'au futur : je <b>viendrais</b> (et non « je venirais »).` },
+  { verb:'Partir', tense:'Présent', person:'1re pers. du singulier',
+    tip:`« je <b>pars</b> » — perte du -t- du radical (part-) au singulier.` },
+  { verb:'Partir', tense:'Présent', person:'2e pers. du singulier',
+    tip:`« tu <b>pars</b> » — perte du -t- du radical (part-) au singulier.` },
+  { verb:'Courir', tense:'Futur simple',
+    tip:`DEUX <b>r</b> : je <b>courrai</b> (et non « je courirai »). Même piège au conditionnel.` },
+  { verb:'Courir', tense:'Conditionnel présent',
+    tip:`DEUX <b>r</b> : je <b>courrais</b> (et non « je courirais »).` },
+  { verb:'Prendre', tense:'Présent', person:'3e pers. du singulier',
+    tip:`« il <b>prend</b> » — le -d final ne se prononce pas.` },
+  { verb:'Prendre', tense:'Présent', person:'3e pers. du pluriel',
+    tip:`« ils <b>prennent</b> » — double n (le radical s'allonge au pluriel).` },
+  { verb:'Mettre', tense:'Présent', person:'1re pers. du singulier',
+    tip:`« je <b>mets</b> » — un seul t au radical singulier (double t à l'infinitif).` },
+  { verb:'Mettre', tense:'Présent', person:'3e pers. du singulier',
+    tip:`« il <b>met</b> » — un seul t au radical singulier (double t à l'infinitif).` },
+  { verb:'Dire', tense:'Présent', person:'2e pers. du pluriel',
+    tip:`« vous <b>dites</b> » est totalement irrégulier — pas « vous disez ».` },
+  { verb:'Faire', tense:'Présent', person:'2e pers. du pluriel',
+    tip:`« vous <b>faites</b> » est totalement irrégulier — pas « vous faisez ».` },
+  { verb:'Faire', tense:'Présent', person:'3e pers. du pluriel',
+    tip:`« ils <b>font</b> » — radical complètement différent du reste de la conjugaison.` },
+  { verb:'Pouvoir', tense:'Présent', person:'1re pers. du singulier',
+    tip:`« je <b>peux</b> » — terminaison en -x (et non -s) aux deux premières personnes du singulier.` },
+  { verb:'Pouvoir', tense:'Présent', person:'2e pers. du singulier',
+    tip:`« tu <b>peux</b> » — terminaison en -x (et non -s) aux deux premières personnes du singulier.` },
+  { verb:'Pouvoir', tense:'Subjonctif présent',
+    tip:`Radical irrégulier <b>puiss-</b> : que je <b>puisse</b> (et non « que je peuve »).` },
+  { verb:'Vouloir', tense:'Impératif',
+    tip:`Forme soutenue et irrégulière : <b>veuille, veuillons, veuillez</b> (formule de politesse — « veuillez agréer… »).` },
+  { verb:'Devoir', tense:'Participe passé',
+    tip:`<b>« dû »</b> ne porte un accent circonflexe qu'au masculin singulier — pour le distinguer de « du » (article). Pas d'accent au féminin/pluriel (due, dus, dues).` },
+  { verb:'Devoir', tense:'Présent', person:'3e pers. du pluriel',
+    tip:`« ils <b>doivent</b> » — diphtongue « oi », à ne pas confondre avec l'imparfait « ils devaient ».` },
+  { verb:'Savoir', tense:'Impératif',
+    tip:`Radical irrégulier <b>sach-</b> : <b>sache, sachons, sachez</b> (et non « sais, savons… »).` },
+  { verb:'Savoir', tense:'Subjonctif présent',
+    tip:`Radical irrégulier <b>sach-</b> : que je <b>sache</b> (et non « que je sais »).` },
+  { verb:'Voir', tense:'Futur simple',
+    tip:`Radical irrégulier <b>verr-</b> : je <b>verrai</b> (et non « je voirai »). Même piège au conditionnel.` },
+  { verb:'Voir', tense:'Conditionnel présent',
+    tip:`Radical irrégulier <b>verr-</b> : je <b>verrais</b> (et non « je voirais »).` },
+  { verb:'Ouvrir', tense:'Présent',
+    tip:`3ᵉ groupe mais terminaisons du 1ᵉʳ groupe : j'<b>ouvre</b>, tu ouvres, il ouvre… (et non « j'ouvris »).` },
+  { verb:'Finir', tense:'Présent', person:'1re pers. du pluriel',
+    tip:`Le radical s'allonge au pluriel : nous <b>finissons</b> (ajout de -iss-).` },
+  { verb:'Finir', tense:'Présent', person:'2e pers. du pluriel',
+    tip:`Le radical s'allonge au pluriel : vous <b>finissez</b> (ajout de -iss-).` },
+  { verb:'Finir', tense:'Présent', person:'3e pers. du pluriel',
+    tip:`Le radical s'allonge au pluriel : ils <b>finissent</b> (ajout de -iss-).` },
+];
+
+function findPiege(c) {
+  return PIEGES.find(p => p.verb === c.verb && p.tense === c.tense && (!p.person || p.person === c.person));
+}
+
+
+
 let selTenses = new Set(ALL_TENSES);
 let selVerbs  = new Set(ALL_VERBS);
 let selGrp    = 0;
@@ -1018,12 +1141,14 @@ function setGrpFilter(g) {
 }
 
 function getFilteredCards() {
-  const diffOnly = document.getElementById('sw-diff').checked;
+  const diffOnly  = document.getElementById('sw-diff').checked;
+  const piegeOnly = document.getElementById('sw-piege').checked;
   return CARDS.filter(c =>
     selTenses.has(c.tense) &&
     selVerbs.has(c.verb) &&
     (selGrp === 0 || c.group === selGrp) &&
-    (!diffOnly || difficultIds.has(cardId(c)))
+    (!diffOnly  || difficultIds.has(cardId(c))) &&
+    (!piegeOnly || findPiege(c))
   );
 }
 
@@ -1131,6 +1256,8 @@ function showCard() {
   } else {
     personWrap.style.display = 'none';
   }
+
+  document.getElementById('q-piege-badge').style.display = findPiege(c) ? '' : 'none';
 
   updateProgress();
   showScreen('screen-quiz');
@@ -1240,6 +1367,16 @@ function validate() {
   // Explication groupe
   document.getElementById('group-explain-label').textContent = '📚 ' + c.groupName;
   document.getElementById('group-explain-text').innerHTML    = c.groupExplain;
+
+  // Piège fréquent
+  const piege = findPiege(c);
+  const piegeBox = document.getElementById('piege-box');
+  if (piege) {
+    piegeBox.style.display = '';
+    document.getElementById('piege-box-text').innerHTML = piege.tip;
+  } else {
+    piegeBox.style.display = 'none';
+  }
 
   // Verso Anki
   document.getElementById('card-back-content').innerHTML = c.cardBack;
