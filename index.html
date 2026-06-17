@@ -604,6 +604,29 @@
       margin-bottom: 4px; font-size: 0.8rem;
       text-transform: uppercase; letter-spacing: 0.05em;
     }
+
+    /* ── SYNC CLOUD ──────────────────────────────────────── */
+    .sync-input {
+      width: 100%; padding: 9px 11px; border-radius: 10px;
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); font-size: 0.78rem; font-family: inherit;
+      margin-bottom: 8px; outline: none;
+    }
+    .sync-input:focus { border-color: var(--blue); }
+    .sync-actions { display: flex; gap: 8px; }
+    .sync-actions button {
+      flex: 1; padding: 9px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text-muted); font-weight: 600; font-size: 0.8rem;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .sync-actions button.primary {
+      background: var(--blue-dim); border-color: var(--blue-border); color: var(--blue);
+    }
+    .sync-status { font-size: 0.74rem; margin-top: 8px; min-height: 1em; color: var(--text-muted); }
+    .sync-status.ok  { color: var(--green); }
+    .sync-status.err { color: var(--red); }
+    .sync-help { font-size: 0.7rem; color: var(--text-dim); margin-top: 6px; line-height: 1.45; }
   </style>
 </head>
 <body>
@@ -660,6 +683,20 @@
           <span class="sw-slider"></span>
         </label>
       </div>
+    </div>
+
+    <!-- Sync cloud -->
+    <div class="filter-box">
+      <div class="box-title">☁️ Synchronisation des stats</div>
+      <input type="text" id="sync-url" class="sync-input"
+        placeholder="URL du script Google (…/exec)"
+        autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+      <div class="sync-actions">
+        <button onclick="saveSyncUrl()">Enregistrer l'URL</button>
+        <button class="primary" onclick="syncNow(false)">Synchroniser</button>
+      </div>
+      <div class="sync-status" id="sync-status"></div>
+      <div class="sync-help">Les stats s'envoient aussi automatiquement à la fin de chaque série.</div>
     </div>
 
     <div class="select-footer">
@@ -1092,6 +1129,9 @@ function showSelect() {
   buildChips('chips-tense', ALL_TENSES, selTenses, 'T');
   buildChips('chips-verb',  ALL_VERBS,  selVerbs,  'V');
   updateSelCount();
+  const _su = document.getElementById('sync-url');
+  if (_su) _su.value = localStorage.getItem(SYNC_URL_KEY) || '';
+  renderSyncStatus();
   showScreen('screen-select');
 }
 
@@ -1158,6 +1198,72 @@ function updateSelCount() {
   document.getElementById('sel-count').textContent = txt;
   document.getElementById('sel-total').textContent = txt;
   document.getElementById('btn-launch').disabled = n === 0;
+}
+
+
+// ════════════════════════════════════════════════════════
+//  SYNC CLOUD (Google Apps Script)
+// ════════════════════════════════════════════════════════
+
+const SYNC_URL_KEY  = 'conjugaison_sync_url';
+const SYNC_LAST_KEY = 'conjugaison_sync_last';
+const DEVICE_KEY    = 'conjugaison_device';
+
+function getDeviceId() {
+  let d = localStorage.getItem(DEVICE_KEY);
+  if (!d) { d = 'dev-' + Math.random().toString(36).slice(2, 8); localStorage.setItem(DEVICE_KEY, d); }
+  return d;
+}
+
+function saveSyncUrl() {
+  const u = document.getElementById('sync-url').value.trim();
+  localStorage.setItem(SYNC_URL_KEY, u);
+  setSyncStatus(u ? 'URL enregistrée ✓' : 'URL effacée', u ? 'ok' : 'err');
+}
+
+function setSyncStatus(msg, cls) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'sync-status' + (cls ? ' ' + cls : '');
+}
+
+function renderSyncStatus() {
+  const last = localStorage.getItem(SYNC_LAST_KEY);
+  if (last) {
+    const d = new Date(last);
+    setSyncStatus('Dernière sync : ' + d.toLocaleString('fr-FR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}), 'ok');
+  } else {
+    setSyncStatus('', '');
+  }
+}
+
+async function syncNow(silent) {
+  const url = (localStorage.getItem(SYNC_URL_KEY) || '').trim();
+  if (!url) { if (!silent) setSyncStatus("Configure d'abord l'URL du script", 'err'); return; }
+  const payload = {
+    device:    getDeviceId(),
+    ts:        new Date().toISOString(),
+    stats:     loadStats(),
+    difficult: [...difficultIds],
+    ua:        navigator.userAgent
+  };
+  if (!silent) setSyncStatus('Envoi…', '');
+  if (!navigator.onLine) { if (!silent) setSyncStatus('Hors-ligne — réessaie plus tard', 'err'); return; }
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+      redirect: 'follow'
+    });
+    localStorage.setItem(SYNC_LAST_KEY, payload.ts);
+    if (!silent) setSyncStatus('✓ Synchronisé à ' + new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}), 'ok');
+  } catch (e) {
+    // La requête est généralement bien partie ; seule la lecture de la réponse est bloquée par CORS.
+    localStorage.setItem(SYNC_LAST_KEY, payload.ts);
+    if (!silent) setSyncStatus('✓ Envoyé (confirmation indisponible)', 'ok');
+  }
 }
 
 function launchQuiz() {
@@ -1424,6 +1530,7 @@ function nextCard() {
 }
 
 function showFinal() {
+  syncNow(true);
   document.getElementById('final-num').textContent   = score;
   document.getElementById('final-denom').textContent = ' / ' + totalCards + ' correctes';
 
