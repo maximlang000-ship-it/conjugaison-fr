@@ -627,6 +627,23 @@
     .sync-status.ok  { color: var(--green); }
     .sync-status.err { color: var(--red); }
     .sync-help { font-size: 0.7rem; color: var(--text-dim); margin-top: 6px; line-height: 1.45; }
+
+    /* ── PHRASE-REPÈRE (exemple mnémonique) ──────────────── */
+    .example-box {
+      background: rgba(91,127,232,0.08);
+      border: 1px solid var(--blue-border);
+      border-left: 4px solid var(--blue);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .example-label {
+      font-weight: 800; color: var(--blue);
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 5px;
+    }
+    .example-text { font-size: 0.98rem; line-height: 1.5; color: var(--text); }
+    .example-text b { color: var(--blue); }
   </style>
 </head>
 <body>
@@ -796,6 +813,11 @@
     <div class="result-block">
       <div class="result-block-title">Résultat</div>
       <div id="result-rows"></div>
+    </div>
+
+    <div class="example-box" id="example-box" style="display:none">
+      <div class="example-label">🧠 Phrase-repère</div>
+      <div class="example-text" id="example-text"></div>
     </div>
 
     <div class="tense-explain" id="tense-explain"></div>
@@ -1116,6 +1138,54 @@ const PIEGES = [
 function findPiege(c) {
   return PIEGES.find(p => p.verb === c.verb && p.tense === c.tense && (!p.person || p.person === c.person));
 }
+
+// ════════════════════════════════════════════════════════
+//  PHRASES-REPÈRES (exemples mnémoniques)
+//  Cadre fixe par temps + complément neutre par verbe.
+// ════════════════════════════════════════════════════════
+
+const VERB_COMPLEMENT = {
+  'Parler':'français', 'Finir':'le travail', 'Être':'en retard', 'Avoir':'de la chance',
+  'Aller':'au marché', 'Venir':'ici', 'Partir':'en vacances', 'Ouvrir':'la porte',
+  'Courir':'vite', 'Prendre':'le bus', 'Mettre':'la table', 'Dire':'la vérité',
+  'Faire':'la cuisine', 'Voir':'la mer', 'Pouvoir':'attendre', 'Vouloir':'un café',
+  'Devoir':'payer', 'Savoir':'nager'
+};
+
+// pre = texte avant la forme conjuguée ; post = texte après le complément
+const TENSE_FRAME = {
+  'Présent':              { pre:'Maintenant, ',     post:'.' },
+  'Imparfait':            { pre:'Autrefois, ',      post:'.' },
+  'Futur simple':         { pre:'Demain, ',         post:'.' },
+  'Passé simple':         { pre:'Ce jour-là, ',     post:'.' },
+  'Conditionnel présent': { pre:"S'il le fallait, ", post:'.' },
+  'Subjonctif présent':   { pre:'Il faut ',         post:'.' },   // la réponse contient déjà « que je… »
+  'Impératif':            { pre:'',                 post:' !' },  // verbe seul, à capitaliser
+  'Participe présent':    { pre:"Je l'imagine ",    post:'.' },  // « Je l'imagine parlant français. »
+  'Gérondif':             { pre:'On apprend ',      post:'.' }    // « On apprend en parlant français. »
+  // Participe passé : traité à part (auxiliaire avoir/être)
+};
+
+const PP_ETRE = ['Aller', 'Venir', 'Partir'];  // auxiliaire être au passé composé
+
+function _capFirstInBold(html, word) {
+  return html.replace('<b>' + word, '<b>' + word.charAt(0).toUpperCase() + word.slice(1));
+}
+
+function buildExample(c) {
+  const comp = VERB_COMPLEMENT[c.verb] || '';
+  if (c.tense === 'Participe passé') {
+    const aux = PP_ETRE.includes(c.verb) ? 'Je suis ' : "J'ai ";
+    return aux + '<b>' + c.answer + '</b> ' + comp + '.';
+  }
+  const f = TENSE_FRAME[c.tense];
+  if (!f) return '';
+  let s = f.pre + '<b>' + c.answer + '</b> ' + comp + f.post;
+  if (f.pre === '') s = _capFirstInBold(s, c.answer);  // impératif : majuscule
+  return s;
+}
+
+
 
 
 
@@ -1482,6 +1552,16 @@ function validate() {
     document.getElementById('piege-box-text').innerHTML = piege.tip;
   } else {
     piegeBox.style.display = 'none';
+  }
+
+  // Phrase-repère (exemple mnémonique)
+  const _ex = buildExample(c);
+  const _exBox = document.getElementById('example-box');
+  if (_ex) {
+    _exBox.style.display = '';
+    document.getElementById('example-text').innerHTML = _ex;
+  } else {
+    _exBox.style.display = 'none';
   }
 
   // Verso Anki
