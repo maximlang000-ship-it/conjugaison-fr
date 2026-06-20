@@ -878,6 +878,7 @@
       placeholder="ex : nous finissons / j'aurai / qu'il vienne…"
       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
       inputmode="text" enterkeyhint="done" data-gramm="false" data-gramm_editor="false"
+      onbeforeinput="if(event.inputType==='insertReplacementText'||event.inputType==='insertAutocompletion')event.preventDefault()"
       oninput="checkCanValidate()"
       onkeydown="if(event.key==='Enter')tryValidate()">
 
