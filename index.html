@@ -876,7 +876,8 @@
     <div class="section-label">Ta conjugaison</div>
     <input type="text" id="answer-input"
       placeholder="ex : nous finissons / j'aurai / qu'il vienne…"
-      autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      inputmode="text" enterkeyhint="done" data-gramm="false" data-gramm_editor="false"
       oninput="checkCanValidate()"
       onkeydown="if(event.key==='Enter')tryValidate()">
 
@@ -936,7 +937,7 @@
     </div>
 
     <div class="exc-box" id="exc-box" style="display:none">
-      <div class="exc-label">🔴 Exception / radical irrégulier</div>
+      <div class="exc-label">🔴 Exception — explication</div>
       <div class="exc-text" id="exc-text"></div>
     </div>
 
@@ -1306,55 +1307,55 @@ function _capFirstInBold(html, word) {
 
 const EXC = {
   // ── Futur simple : radicaux irréguliers ──
-  'Courir|Futur simple':  { hl:['rr'],     rule:"<b>Deux r</b> : radical <i>courr-</i> (et non cour-). Même radical au conditionnel." },
-  'Pouvoir|Futur simple': { hl:['rr'],     rule:"Radical <i>pourr-</i> (<b>deux r</b>)." },
-  'Voir|Futur simple':    { hl:['verr'],   rule:"Radical irrégulier <i>verr-</i> (et non voir-)." },
-  'Aller|Futur simple':   { hl:['ir'],     rule:"Radical <i>ir-</i> (et non aller-) : j'irai." },
-  'Être|Futur simple':    { hl:['ser'],    rule:"Radical <i>ser-</i>." },
-  'Avoir|Futur simple':   { hl:['aur'],    rule:"Radical <i>aur-</i>." },
-  'Faire|Futur simple':   { hl:['fer'],    rule:"Radical <i>fer-</i> (et non fair-)." },
-  'Vouloir|Futur simple': { hl:['voudr'],  rule:"Radical <i>voudr-</i>." },
-  'Devoir|Futur simple':  { hl:['devr'],   rule:"Radical <i>devr-</i>." },
-  'Savoir|Futur simple':  { hl:['saur'],   rule:"Radical <i>saur-</i>." },
-  'Venir|Futur simple':   { hl:['viendr'], rule:"Radical <i>viendr-</i>." },
+  'Courir|Futur simple':  { hl:['rr'],     rule:"Le futur se construit sur le radical <b>courr-</b> (deux r), pas sur l'infinitif. On entend les deux r : « je cou-rrai ». Erreur fréquente : <i>je courai</i>. Même radical au conditionnel." },
+  'Pouvoir|Futur simple': { hl:['rr'],     rule:"Radical <b>pourr-</b> avec deux r : je pourrai. On entend le double r ; erreur : <i>je pourai</i>." },
+  'Voir|Futur simple':    { hl:['verr'],   rule:"Voir prend le radical <b>verr-</b> (deux r) au futur : je verrai. Erreur : <i>je voirai</i>. Idem au conditionnel." },
+  'Aller|Futur simple':   { hl:['ir'],     rule:"Aller abandonne son radical au futur et prend <b>ir-</b> : j'irai, tu iras… Aucun rapport avec l'infinitif." },
+  'Être|Futur simple':    { hl:['ser'],    rule:"Radical spécial <b>ser-</b> : je serai. À ne pas confondre avec « je saurai » (savoir)." },
+  'Avoir|Futur simple':   { hl:['aur'],    rule:"Radical <b>aur-</b> : j'aurai, tu auras… Le radical n'a plus rien de « avoir »." },
+  'Faire|Futur simple':   { hl:['fer'],    rule:"Radical <b>fer-</b> (et non « fair- ») : je ferai, prononcé [fëre]." },
+  'Vouloir|Futur simple': { hl:['voudr'],  rule:"Un <b>d</b> apparaît : radical <b>voudr-</b> (je voudrai)." },
+  'Devoir|Futur simple':  { hl:['devr'],   rule:"Radical <b>devr-</b> : je devrai, tu devras…" },
+  'Savoir|Futur simple':  { hl:['saur'],   rule:"Radical <b>saur-</b> : je saurai. À ne pas confondre avec « je serai » (être)." },
+  'Venir|Futur simple':   { hl:['viendr'], rule:"Un <b>d</b> s'intercale : radical <b>viendr-</b> (je viendrai). Même schéma pour tenir → tiendr-." },
 
-  // ── Conditionnel présent : MÊME radical que le futur + terminaisons -ais/-ait ──
-  'Courir|Conditionnel présent':  { hl:['rr'],     rule:"Radical du futur <i>courr-</i> (deux r) + terminaisons <b>-ais/-ait</b>." },
-  'Pouvoir|Conditionnel présent': { hl:['rr'],     rule:"Radical <i>pourr-</i> + terminaisons <b>-ais/-ait</b>." },
-  'Voir|Conditionnel présent':    { hl:['verr'],   rule:"Radical <i>verr-</i> + terminaisons <b>-ais/-ait</b>." },
-  'Aller|Conditionnel présent':   { hl:['ir'],     rule:"Radical <i>ir-</i> + terminaisons <b>-ais/-ait</b> : j'irais." },
-  'Être|Conditionnel présent':    { hl:['ser'],    rule:"Radical <i>ser-</i> + terminaisons <b>-ais/-ait</b>." },
-  'Avoir|Conditionnel présent':   { hl:['aur'],    rule:"Radical <i>aur-</i> + terminaisons <b>-ais/-ait</b>." },
-  'Faire|Conditionnel présent':   { hl:['fer'],    rule:"Radical <i>fer-</i> + terminaisons <b>-ais/-ait</b>." },
-  'Vouloir|Conditionnel présent': { hl:['voudr'],  rule:"Radical <i>voudr-</i> + terminaisons <b>-ais/-ait</b>." },
-  'Devoir|Conditionnel présent':  { hl:['devr'],   rule:"Radical <i>devr-</i> + terminaisons <b>-ais/-ait</b>." },
-  'Savoir|Conditionnel présent':  { hl:['saur'],   rule:"Radical <i>saur-</i> + terminaisons <b>-ais/-ait</b>." },
-  'Venir|Conditionnel présent':   { hl:['viendr'], rule:"Radical <i>viendr-</i> + terminaisons <b>-ais/-ait</b>." },
+  // ── Conditionnel présent : même radical que le futur + terminaisons de l'imparfait ──
+  'Courir|Conditionnel présent':  { hl:['rr'],     rule:"Même radical <b>courr-</b> qu'au futur, mais terminaisons de l'imparfait <b>-ais/-ait</b>. Futur « je courrai » (certain) vs conditionnel « je courrais » (hypothèse) : c'est le <b>s</b> final qui distingue." },
+  'Pouvoir|Conditionnel présent': { hl:['rr'],     rule:"Radical <b>pourr-</b> (comme le futur) + terminaisons <b>-ais/-ait</b>. « je pourrai » (futur) ≠ « je pourrais » (conditionnel)." },
+  'Voir|Conditionnel présent':    { hl:['verr'],   rule:"Radical <b>verr-</b> + <b>-ais/-ait</b>. « je verrai » (futur) vs « je verrais » (conditionnel) — le s final fait la différence." },
+  'Aller|Conditionnel présent':   { hl:['ir'],     rule:"Radical <b>ir-</b> + <b>-ais/-ait</b> : j'irais. « j'irai » (futur) ≠ « j'irais » (conditionnel)." },
+  'Être|Conditionnel présent':    { hl:['ser'],    rule:"Radical <b>ser-</b> + <b>-ais/-ait</b> : je serais. À distinguer du futur « je serai »." },
+  'Avoir|Conditionnel présent':   { hl:['aur'],    rule:"Radical <b>aur-</b> + <b>-ais/-ait</b> : j'aurais. Futur « j'aurai » ≠ conditionnel « j'aurais »." },
+  'Faire|Conditionnel présent':   { hl:['fer'],    rule:"Radical <b>fer-</b> + <b>-ais/-ait</b> : je ferais." },
+  'Vouloir|Conditionnel présent': { hl:['voudr'],  rule:"Radical <b>voudr-</b> + <b>-ais/-ait</b> : je voudrais (formule de politesse : « je voudrais… »)." },
+  'Devoir|Conditionnel présent':  { hl:['devr'],   rule:"Radical <b>devr-</b> + <b>-ais/-ait</b> : je devrais (conseil : « tu devrais… »)." },
+  'Savoir|Conditionnel présent':  { hl:['saur'],   rule:"Radical <b>saur-</b> + <b>-ais/-ait</b> : je saurais." },
+  'Venir|Conditionnel présent':   { hl:['viendr'], rule:"Radical <b>viendr-</b> + <b>-ais/-ait</b> : je viendrais. Futur « je viendrai » ≠ conditionnel « je viendrais »." },
 
   // ── Subjonctif présent : radicaux irréguliers ──
-  'Être|Subjonctif présent':    { hl:['soi','soy'],     rule:"Radical irrégulier <i>soi-/soy-</i> : que je sois, que nous soyons." },
-  'Avoir|Subjonctif présent':   { hl:['ai','ay'],       rule:"Radical irrégulier <i>ai-/ay-</i> : que j'aie, que nous ayons." },
-  'Aller|Subjonctif présent':   { hl:['aill','alli'],   rule:"Radical <i>aill-</i> (que j'aille) / <i>all-</i> à nous-vous." },
-  'Faire|Subjonctif présent':   { hl:['fass'],          rule:"Radical <i>fass-</i> : que je fasse." },
-  'Pouvoir|Subjonctif présent': { hl:['puiss'],         rule:"Radical <i>puiss-</i> : que je puisse." },
-  'Savoir|Subjonctif présent':  { hl:['sach'],          rule:"Radical <i>sach-</i> : que je sache." },
-  'Vouloir|Subjonctif présent': { hl:['veuill','voul'], rule:"Radical <i>veuill-</i> (sg+3pl) / <i>voul-</i> à nous-vous." },
-  'Venir|Subjonctif présent':   { hl:['vienn'],         rule:"<b>Double n</b> : que je vienne (radical vienn-)." },
-  'Prendre|Subjonctif présent': { hl:['prenn'],         rule:"<b>Double n</b> : que je prenne." },
-  'Devoir|Subjonctif présent':  { hl:['doiv'],          rule:"Radical <i>doiv-</i> : que je doive." },
+  'Être|Subjonctif présent':    { hl:['soi','soy'],     rule:"Subjonctif totalement irrégulier : <b>soi-</b> (sois, soit, soient) et <b>soy-</b> à nous/vous (soyons, soyez)." },
+  'Avoir|Subjonctif présent':   { hl:['ai','ay'],       rule:"Radicaux <b>ai-</b> (aie, ait, aient) et <b>ay-</b> à nous/vous (ayons, ayez). « que j'aie » ≠ « j'ai » (présent)." },
+  'Aller|Subjonctif présent':   { hl:['aill','alli'],   rule:"Deux radicaux : <b>aill-</b> au singulier et 3ᵉ pluriel (que j'aille), <b>all-</b> à nous/vous (que nous allions)." },
+  'Faire|Subjonctif présent':   { hl:['fass'],          rule:"Radical <b>fass-</b> : que je fasse, qu'ils fassent. Erreur : <i>que je faise</i>." },
+  'Pouvoir|Subjonctif présent': { hl:['puiss'],         rule:"Radical <b>puiss-</b> : que je puisse. Rien à voir avec « je peux »." },
+  'Savoir|Subjonctif présent':  { hl:['sach'],          rule:"Radical <b>sach-</b> : que je sache, que nous sachions." },
+  'Vouloir|Subjonctif présent': { hl:['veuill','voul'], rule:"Radical <b>veuill-</b> au sg + 3ᵉ pl (que je veuille), mais <b>voul-</b> à nous/vous (que nous voulions)." },
+  'Venir|Subjonctif présent':   { hl:['vienn'],         rule:"Double n au radical <b>vienn-</b> (que je vienne) au sg + 3ᵉ pl ; <b>ven-</b> à nous/vous (que nous venions)." },
+  'Prendre|Subjonctif présent': { hl:['prenn'],         rule:"Double n : que je prenne, qu'ils prennent ; mais « que nous prenions » (un seul n)." },
+  'Devoir|Subjonctif présent':  { hl:['doiv'],          rule:"Radical <b>doiv-</b> (que je doive) au sg + 3ᵉ pl ; « que nous devions » à nous/vous." },
 
   // ── Passé simple : très irrégulier ──
-  'Venir|Passé simple': { hl:['vin','vîn'], rule:"Passé simple irrégulier en <i>-in-</i> : je vins, il vint, ils vinrent." },
+  'Venir|Passé simple': { hl:['vin','vîn'], rule:"Passé simple très irrégulier en <b>-in-</b> : je vins, tu vins, il vint, nous vînmes, ils vinrent. (tenir suit le même modèle : je tins.)" },
 
   // ── Présent : terminaisons surprenantes ──
-  'Pouvoir|Présent': { hl:['x'], rule:"Terminaison <b>-x</b> (et non -s) à je/tu : je peux, tu peux." },
-  'Vouloir|Présent': { hl:['x'], rule:"Terminaison <b>-x</b> (et non -s) à je/tu : je veux, tu veux." },
+  'Pouvoir|Présent': { hl:['x'], rule:"À <b>je</b> et <b>tu</b>, terminaison <b>-x</b> (et non -s) : je peux, tu peux. Jamais <i>je peus</i>." },
+  'Vouloir|Présent': { hl:['x'], rule:"À <b>je</b> et <b>tu</b>, terminaison <b>-x</b> (et non -s) : je veux, tu veux." },
 
   // ── Impératif : formes irrégulières ──
-  'Être|Impératif':    { hl:['soi','soy'], rule:"Impératif irrégulier : sois, soyons, soyez." },
-  'Avoir|Impératif':   { hl:['ai','ay'],   rule:"Impératif irrégulier : aie, ayons, ayez." },
-  'Savoir|Impératif':  { hl:['sach'],      rule:"Impératif irrégulier : sache, sachons, sachez." },
-  'Vouloir|Impératif': { hl:['veuill'],    rule:"Impératif de politesse : veuille, veuillons, veuillez." }
+  'Être|Impératif':    { hl:['soi','soy'], rule:"Impératif emprunté au subjonctif : <b>sois, soyons, soyez</b>." },
+  'Avoir|Impératif':   { hl:['ai','ay'],   rule:"Impératif sur le subjonctif : <b>aie</b> (sans -s), ayons, ayez." },
+  'Savoir|Impératif':  { hl:['sach'],      rule:"Impératif irrégulier : <b>sache, sachons, sachez</b>." },
+  'Vouloir|Impératif': { hl:['veuill'],    rule:"Impératif de politesse : <b>veuillez</b> (veuille, veuillons, veuillez) — « veuillez agréer… »." }
 };
 
 function cardException(c) { return EXC[c.verb + '|' + c.tense] || null; }
