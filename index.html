@@ -657,6 +657,47 @@
     }
     .btn-ss.on { background: var(--blue-dim); border-color: var(--blue-border); color: var(--blue); }
     .srs-help { font-size: 0.7rem; color: var(--text-dim); margin-top: 8px; line-height: 1.45; }
+
+    /* ── EXCEPTIONS / RADICAUX IRRÉGULIERS ───────────────── */
+    .exc-red { color: var(--red); font-weight: 800; }
+    .exc-box {
+      background: rgba(248,113,113,0.10);
+      border: 1px solid var(--red);
+      border-left: 4px solid var(--red);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .exc-label {
+      font-weight: 800; color: var(--red);
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 5px;
+    }
+    .exc-text { font-size: 0.9rem; line-height: 1.5; color: var(--text); }
+    .exc-text b { color: var(--red); }
+
+    /* ── MÉMO DES TEMPS ──────────────────────────────────── */
+    .memo {
+      background: var(--surface); border-radius: 16px;
+      padding: 14px 16px; margin-bottom: 12px;
+    }
+    .memo-summary {
+      cursor: pointer; list-style: none;
+      font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--blue);
+    }
+    .memo-summary::-webkit-details-marker { display: none; }
+    .memo-summary::before { content: '▸ '; }
+    .memo[open] .memo-summary::before { content: '▾ '; }
+    .memo-item { padding-top: 10px; border-top: 1px solid var(--border); margin-top: 10px; }
+    .memo-tense { font-weight: 800; color: var(--text); font-size: 0.95rem; margin-bottom: 3px; }
+    .memo-rule { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; line-height: 1.45; }
+    .memo-term {
+      font-size: 0.82rem; color: var(--blue);
+      font-family: ui-monospace, monospace; line-height: 1.7; margin-bottom: 4px;
+    }
+    .memo-ex { font-size: 0.85rem; color: var(--text); }
+    .memo-ex b, .memo-rule b { color: var(--blue); }
   </style>
 </head>
 <body>
@@ -741,6 +782,59 @@
       <div class="sync-status" id="sync-status"></div>
       <div class="sync-help">Les stats s'envoient aussi automatiquement à la fin de chaque série.</div>
     </div>
+
+    <!-- Mémo des temps -->
+    <details class="memo">
+      <summary class="memo-summary">📝 Mémo des temps — à recopier chaque jour</summary>
+
+      <div class="memo-item">
+        <div class="memo-tense">Conditionnel présent</div>
+        <div class="memo-rule">Radical du <b>futur</b> + terminaisons de l'<b>imparfait</b>.</div>
+        <div class="memo-term">-ais · -ais · -ait · -ions · -iez · -aient</div>
+        <div class="memo-ex">je parler<b>ais</b> · je finir<b>ais</b> · je cou<b>rr</b>ais</div>
+      </div>
+
+      <div class="memo-item">
+        <div class="memo-tense">Subjonctif présent</div>
+        <div class="memo-rule">Déclencheur « <b>il faut que</b> ». Radical = <i>ils</i> au présent.</div>
+        <div class="memo-term">-e · -es · -e · -ions · -iez · -ent</div>
+        <div class="memo-ex">que je parl<b>e</b> · que nous finiss<b>ions</b> · qu'ils vienn<b>ent</b></div>
+      </div>
+
+      <div class="memo-item">
+        <div class="memo-tense">Passé simple</div>
+        <div class="memo-rule">Temps du récit (surtout 3<sup>e</sup> pers.). 3 familles :</div>
+        <div class="memo-term">-er → -ai · -a · -èrent<br>-ir / -re → -is · -it · -irent<br>type « u » → -us · -ut · -urent</div>
+        <div class="memo-ex">il parl<b>a</b> · il fin<b>it</b> · il cour<b>ut</b> · il v<b>int</b></div>
+      </div>
+
+      <div class="memo-item">
+        <div class="memo-tense">Futur simple</div>
+        <div class="memo-rule">Infinitif (ou radical irrég.) + terminaisons d'<b>avoir</b>.</div>
+        <div class="memo-term">-ai · -as · -a · -ons · -ez · -ont</div>
+        <div class="memo-ex">je parler<b>ai</b> · je finir<b>ai</b> · je cou<b>rr</b>ai</div>
+      </div>
+
+      <div class="memo-item">
+        <div class="memo-tense">Imparfait</div>
+        <div class="memo-rule">Radical = <i>nous</i> au présent + terminaisons.</div>
+        <div class="memo-term">-ais · -ais · -ait · -ions · -iez · -aient</div>
+        <div class="memo-ex">je parl<b>ais</b> · nous finiss<b>ions</b></div>
+      </div>
+
+      <div class="memo-item">
+        <div class="memo-tense">Présent</div>
+        <div class="memo-rule">1<sup>er</sup> groupe / 2<sup>e</sup> groupe :</div>
+        <div class="memo-term">1ᵉʳ : -e · -es · -e · -ons · -ez · -ent<br>2ᵉ : -is · -it · -issons · -issez · -issent</div>
+        <div class="memo-ex">je parl<b>e</b> · nous finiss<b>ons</b></div>
+      </div>
+
+      <div class="memo-item">
+        <div class="memo-tense">Impératif</div>
+        <div class="memo-rule">Présent sans sujet, 3 pers. (tu / nous / vous). 1ᵉʳ gr. : pas de -s à <i>tu</i>.</div>
+        <div class="memo-ex">parl<b>e</b> · parl<b>ons</b> · parl<b>ez</b></div>
+      </div>
+    </details>
 
     <div class="select-footer">
       <span class="sel-count" id="sel-count">— cartes</span>
@@ -839,6 +933,11 @@
     <div class="result-block">
       <div class="result-block-title">Résultat</div>
       <div id="result-rows"></div>
+    </div>
+
+    <div class="exc-box" id="exc-box" style="display:none">
+      <div class="exc-label">🔴 Exception / radical irrégulier</div>
+      <div class="exc-text" id="exc-text"></div>
     </div>
 
     <div class="example-box" id="example-box" style="display:none">
@@ -1196,6 +1295,89 @@ const PP_ETRE = ['Aller', 'Venir', 'Partir'];  // auxiliaire être au passé com
 
 function _capFirstInBold(html, word) {
   return html.replace('<b>' + word, '<b>' + word.charAt(0).toUpperCase() + word.slice(1));
+}
+
+
+// ════════════════════════════════════════════════════════
+//  EXCEPTIONS / RADICAUX IRRÉGULIERS (surlignage rouge)
+//  Clé = "Verbe|Temps" — s'applique à toutes les personnes.
+//  hl = sous-chaînes à surligner en rouge dans la réponse.
+// ════════════════════════════════════════════════════════
+
+const EXC = {
+  // ── Futur simple : radicaux irréguliers ──
+  'Courir|Futur simple':  { hl:['rr'],     rule:"<b>Deux r</b> : radical <i>courr-</i> (et non cour-). Même radical au conditionnel." },
+  'Pouvoir|Futur simple': { hl:['rr'],     rule:"Radical <i>pourr-</i> (<b>deux r</b>)." },
+  'Voir|Futur simple':    { hl:['verr'],   rule:"Radical irrégulier <i>verr-</i> (et non voir-)." },
+  'Aller|Futur simple':   { hl:['ir'],     rule:"Radical <i>ir-</i> (et non aller-) : j'irai." },
+  'Être|Futur simple':    { hl:['ser'],    rule:"Radical <i>ser-</i>." },
+  'Avoir|Futur simple':   { hl:['aur'],    rule:"Radical <i>aur-</i>." },
+  'Faire|Futur simple':   { hl:['fer'],    rule:"Radical <i>fer-</i> (et non fair-)." },
+  'Vouloir|Futur simple': { hl:['voudr'],  rule:"Radical <i>voudr-</i>." },
+  'Devoir|Futur simple':  { hl:['devr'],   rule:"Radical <i>devr-</i>." },
+  'Savoir|Futur simple':  { hl:['saur'],   rule:"Radical <i>saur-</i>." },
+  'Venir|Futur simple':   { hl:['viendr'], rule:"Radical <i>viendr-</i>." },
+
+  // ── Conditionnel présent : MÊME radical que le futur + terminaisons -ais/-ait ──
+  'Courir|Conditionnel présent':  { hl:['rr'],     rule:"Radical du futur <i>courr-</i> (deux r) + terminaisons <b>-ais/-ait</b>." },
+  'Pouvoir|Conditionnel présent': { hl:['rr'],     rule:"Radical <i>pourr-</i> + terminaisons <b>-ais/-ait</b>." },
+  'Voir|Conditionnel présent':    { hl:['verr'],   rule:"Radical <i>verr-</i> + terminaisons <b>-ais/-ait</b>." },
+  'Aller|Conditionnel présent':   { hl:['ir'],     rule:"Radical <i>ir-</i> + terminaisons <b>-ais/-ait</b> : j'irais." },
+  'Être|Conditionnel présent':    { hl:['ser'],    rule:"Radical <i>ser-</i> + terminaisons <b>-ais/-ait</b>." },
+  'Avoir|Conditionnel présent':   { hl:['aur'],    rule:"Radical <i>aur-</i> + terminaisons <b>-ais/-ait</b>." },
+  'Faire|Conditionnel présent':   { hl:['fer'],    rule:"Radical <i>fer-</i> + terminaisons <b>-ais/-ait</b>." },
+  'Vouloir|Conditionnel présent': { hl:['voudr'],  rule:"Radical <i>voudr-</i> + terminaisons <b>-ais/-ait</b>." },
+  'Devoir|Conditionnel présent':  { hl:['devr'],   rule:"Radical <i>devr-</i> + terminaisons <b>-ais/-ait</b>." },
+  'Savoir|Conditionnel présent':  { hl:['saur'],   rule:"Radical <i>saur-</i> + terminaisons <b>-ais/-ait</b>." },
+  'Venir|Conditionnel présent':   { hl:['viendr'], rule:"Radical <i>viendr-</i> + terminaisons <b>-ais/-ait</b>." },
+
+  // ── Subjonctif présent : radicaux irréguliers ──
+  'Être|Subjonctif présent':    { hl:['soi','soy'],     rule:"Radical irrégulier <i>soi-/soy-</i> : que je sois, que nous soyons." },
+  'Avoir|Subjonctif présent':   { hl:['ai','ay'],       rule:"Radical irrégulier <i>ai-/ay-</i> : que j'aie, que nous ayons." },
+  'Aller|Subjonctif présent':   { hl:['aill','alli'],   rule:"Radical <i>aill-</i> (que j'aille) / <i>all-</i> à nous-vous." },
+  'Faire|Subjonctif présent':   { hl:['fass'],          rule:"Radical <i>fass-</i> : que je fasse." },
+  'Pouvoir|Subjonctif présent': { hl:['puiss'],         rule:"Radical <i>puiss-</i> : que je puisse." },
+  'Savoir|Subjonctif présent':  { hl:['sach'],          rule:"Radical <i>sach-</i> : que je sache." },
+  'Vouloir|Subjonctif présent': { hl:['veuill','voul'], rule:"Radical <i>veuill-</i> (sg+3pl) / <i>voul-</i> à nous-vous." },
+  'Venir|Subjonctif présent':   { hl:['vienn'],         rule:"<b>Double n</b> : que je vienne (radical vienn-)." },
+  'Prendre|Subjonctif présent': { hl:['prenn'],         rule:"<b>Double n</b> : que je prenne." },
+  'Devoir|Subjonctif présent':  { hl:['doiv'],          rule:"Radical <i>doiv-</i> : que je doive." },
+
+  // ── Passé simple : très irrégulier ──
+  'Venir|Passé simple': { hl:['vin','vîn'], rule:"Passé simple irrégulier en <i>-in-</i> : je vins, il vint, ils vinrent." },
+
+  // ── Présent : terminaisons surprenantes ──
+  'Pouvoir|Présent': { hl:['x'], rule:"Terminaison <b>-x</b> (et non -s) à je/tu : je peux, tu peux." },
+  'Vouloir|Présent': { hl:['x'], rule:"Terminaison <b>-x</b> (et non -s) à je/tu : je veux, tu veux." },
+
+  // ── Impératif : formes irrégulières ──
+  'Être|Impératif':    { hl:['soi','soy'], rule:"Impératif irrégulier : sois, soyons, soyez." },
+  'Avoir|Impératif':   { hl:['ai','ay'],   rule:"Impératif irrégulier : aie, ayons, ayez." },
+  'Savoir|Impératif':  { hl:['sach'],      rule:"Impératif irrégulier : sache, sachons, sachez." },
+  'Vouloir|Impératif': { hl:['veuill'],    rule:"Impératif de politesse : veuille, veuillons, veuillez." }
+};
+
+function cardException(c) { return EXC[c.verb + '|' + c.tense] || null; }
+
+function highlightAnswer(c) {
+  const e = EXC[c.verb + '|' + c.tense];
+  const ans = c.answer;
+  if (!e || !e.hl) return ans;
+  const low = ans.toLowerCase();
+  const ranges = [];
+  e.hl.forEach(sub => {
+    const i = low.indexOf(sub.toLowerCase());
+    if (i >= 0) ranges.push([i, i + sub.length]);
+  });
+  if (!ranges.length) return ans;
+  ranges.sort((a, b) => a[0] - b[0]);
+  let out = '', pos = 0;
+  ranges.forEach(([s, en]) => {
+    if (s < pos) return;
+    out += ans.slice(pos, s) + '<span class="exc-red">' + ans.slice(s, en) + '</span>';
+    pos = en;
+  });
+  return out + ans.slice(pos);
 }
 
 function buildExample(c) {
@@ -1615,12 +1797,16 @@ function validate() {
     inp.classList.add('shake');
   }
 
+  // Exception / radical irrégulier (surlignage rouge)
+  const exc = cardException(c);
+  const ansHtml = highlightAnswer(c);
+
   // Badge (basé sur la conjugaison)
   const badge = document.getElementById('result-badge');
   badge.className = 'result-badge ' + (conjOk ? 'correct' : 'incorrect');
   badge.innerHTML = conjOk
     ? '✓ Correct !'
-    : `✗ Incorrect<span class="result-sub">${userRaw} → <b>${c.answer}</b></span>`;
+    : `✗ Incorrect<span class="result-sub">${userRaw} → <b>${ansHtml}</b></span>`;
 
   // Lignes résultat
   const groupLabel = selectedGroup === 1 ? '1er' : selectedGroup + 'ème';
@@ -1628,7 +1814,7 @@ function validate() {
     <div class="result-row">
       <span class="result-row-label">Conjugaison</span>
       <span class="result-row-val ${conjOk ? 'ok' : 'ko'}">
-        ${conjOk ? c.answer + ' ✓' : '<del>' + userRaw + '</del> → ' + c.answer}
+        ${conjOk ? ansHtml + ' ✓' : '<del>' + userRaw + '</del> → ' + ansHtml}
       </span>
     </div>
     <div class="result-row">
@@ -1645,10 +1831,19 @@ function validate() {
   document.getElementById('group-explain-label').textContent = '📚 ' + c.groupName;
   document.getElementById('group-explain-text').innerHTML    = c.groupExplain;
 
-  // Piège fréquent
+  // Exception / règle (texte rouge)
+  const excBox = document.getElementById('exc-box');
+  if (exc) {
+    excBox.style.display = '';
+    document.getElementById('exc-text').innerHTML = exc.rule;
+  } else {
+    excBox.style.display = 'none';
+  }
+
+  // Piège fréquent (masqué si une exception couvre déjà la carte)
   const piege = findPiege(c);
   const piegeBox = document.getElementById('piege-box');
-  if (piege) {
+  if (piege && !exc) {
     piegeBox.style.display = '';
     document.getElementById('piege-box-text').innerHTML = piege.tip;
   } else {
