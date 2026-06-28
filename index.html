@@ -698,6 +698,47 @@
     }
     .memo-ex { font-size: 0.85rem; color: var(--text); }
     .memo-ex b, .memo-rule b { color: var(--blue); }
+
+    /* ── DAILY (routine quotidienne) ─────────────────────── */
+    #screen-daily { display: none; padding-bottom: 30px; }
+    .daily-cta {
+      display: block; width: 100%; padding: 14px; margin-bottom: 12px;
+      border: none; border-radius: 14px;
+      background: linear-gradient(135deg, var(--blue), #7c5cff);
+      color: #fff; font-size: 1rem; font-weight: 800; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .daily-intro { margin-bottom: 14px; }
+    .daily-title { font-size: 1.3rem; font-weight: 800; color: var(--text); }
+    .daily-sub { font-size: 0.85rem; color: var(--blue); text-transform: capitalize; margin-top: 2px; }
+    .daily-note { font-size: 0.8rem; color: var(--text-muted); margin-top: 8px; line-height: 1.5; }
+    .daily-card { background: var(--surface); border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; }
+    .daily-card-red { border: 1px solid var(--red); }
+    .daily-card-title {
+      font-size: 0.78rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--blue); margin-bottom: 10px;
+    }
+    .daily-card-red .daily-card-title { color: var(--red); }
+    .daily-muet { margin: 0; padding-left: 18px; font-size: 0.85rem; line-height: 1.7; color: var(--text); }
+    .daily-muet b { color: var(--red); }
+    .daily-block { margin-bottom: 14px; }
+    .daily-block:last-child { margin-bottom: 0; }
+    .daily-tense { font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .daily-conj {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px;
+      font-size: 0.92rem; color: var(--text); margin-bottom: 6px;
+    }
+    .daily-conj .exc-red { color: var(--red); font-weight: 800; }
+    .daily-phrase { font-size: 0.85rem; color: var(--text-muted); font-style: italic; margin-top: 4px; }
+    .daily-phrase b { color: var(--blue); font-style: normal; }
+    .daily-done {
+      display: block; width: 100%; padding: 14px; margin-top: 4px;
+      border: none; border-radius: 14px;
+      background: var(--blue); color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .daily-done.done { background: var(--green); }
+    .daily-done:disabled { opacity: 0.85; cursor: default; }
   </style>
 </head>
 <body>
@@ -710,6 +751,8 @@
       <span class="header-title">Conjugaison FR</span>
       <span class="header-meta" id="sel-total">— cartes</span>
     </div>
+
+    <button class="daily-cta" onclick="showDaily()">📅 Ma routine du jour</button>
 
     <!-- Stats -->
     <div class="stats-box">
@@ -840,6 +883,43 @@
       <span class="sel-count" id="sel-count">— cartes</span>
       <button class="btn-launch" id="btn-launch" onclick="launchQuiz()">Lancer →</button>
     </div>
+  </div>
+
+  <!-- ══════════ DAILY SCREEN ══════════ -->
+  <div id="screen-daily">
+    <div class="header">
+      <span class="header-title">Conjugaison FR</span>
+      <button class="btn-back" onclick="showSelect()">← Menu</button>
+      <span class="header-meta" id="daily-streak">🔥 0</span>
+    </div>
+
+    <div class="daily-intro">
+      <div class="daily-title">📅 Routine du jour</div>
+      <div class="daily-sub" id="daily-date"></div>
+      <div class="daily-note">Recopie tout à la main. Objectif : fixer ce qui <b>ne s'entend pas</b> — lettres muettes et doubles consonnes.</div>
+    </div>
+
+    <div class="daily-card">
+      <div class="daily-card-title">✍️ Les muets à ne jamais oublier</div>
+      <ul class="daily-muet">
+        <li><b>-ent</b> (3ᵉ pers. pluriel) ne s'entend pas : ils parl<b>ent</b>, ils finiss<b>ent</b>.</li>
+        <li>Conditionnel = futur + <b>s</b> muet : je courr<b>ai</b> (futur) → je courr<b>ais</b> (conditionnel).</li>
+        <li>Subjonctif : terminaisons muettes <b>-e / -es / -ent</b> (que je parl<b>e</b>).</li>
+        <li>Doubles consonnes qu'on n'entend pas : cou<b>rr</b>ai, pou<b>rr</b>ai, ve<b>rr</b>ai.</li>
+      </ul>
+    </div>
+
+    <div class="daily-card">
+      <div class="daily-card-title">📌 Temps difficiles — verbe du jour</div>
+      <div id="daily-verb"></div>
+    </div>
+
+    <div class="daily-card daily-card-red">
+      <div class="daily-card-title">🔴 Le piège du jour</div>
+      <div id="daily-piege"></div>
+    </div>
+
+    <button class="daily-done" id="daily-done-btn" onclick="markDailyDone()">J'ai écrit aujourd'hui</button>
   </div>
 
   <!-- ══════════ QUIZ SCREEN ══════════ -->
@@ -1956,8 +2036,94 @@ function showFinal() {
 //  UTILITAIRES
 // ════════════════════════════════════════════════════════
 
+// ════════════════════════════════════════════════════════
+//  ROUTINE QUOTIDIENNE (DAILY)
+// ════════════════════════════════════════════════════════
+
+const LS_DAILY = 'conjugaison_daily';
+const DAILY_HARD_TENSES = ['Conditionnel présent', 'Subjonctif présent'];
+
+function _dayIndex() {
+  const d = new Date();
+  return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+}
+function _todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+}
+
+function _dailyTable(verb, tense) {
+  const cards = CARDS.filter(c => c.verb === verb && c.tense === tense);
+  if (!cards.length) return '';
+  return '<div class="daily-conj">' +
+    cards.map(c => '<span>' + highlightAnswer(c) + '</span>').join('') +
+    '</div>';
+}
+
+function showDaily() { renderDaily(); showScreen('screen-daily'); }
+
+function renderDaily() {
+  const di = _dayIndex();
+  const verbe = ALL_VERBS[di % ALL_VERBS.length];
+
+  document.getElementById('daily-date').textContent =
+    new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  let html = '';
+  DAILY_HARD_TENSES.forEach(t => {
+    html += '<div class="daily-block">';
+    html += '<div class="daily-tense">' + t + ' — <b>' + verbe + '</b></div>';
+    html += _dailyTable(verbe, t);
+    const card = CARDS.find(c => c.verb === verbe && c.tense === t && c.person === '1re pers. du singulier');
+    if (card) html += '<div class="daily-phrase">🧠 ' + buildExample(card) + '</div>';
+    html += '</div>';
+  });
+  document.getElementById('daily-verb').innerHTML = html;
+
+  // Piège du jour (décalé pour varier par rapport au verbe du jour)
+  const keys = Object.keys(EXC);
+  const key = keys[(di + 3) % keys.length];
+  const parts = key.split('|');
+  const e = EXC[key];
+  let ph = '<div class="daily-tense">' + parts[0] + ' — ' + parts[1] + '</div>';
+  ph += _dailyTable(parts[0], parts[1]);
+  ph += '<div class="exc-text" style="margin-top:8px">' + e.rule + '</div>';
+  document.getElementById('daily-piege').innerHTML = ph;
+
+  renderStreak();
+}
+
+function _loadDaily() {
+  try { return JSON.parse(localStorage.getItem(LS_DAILY) || '{}'); }
+  catch { return {}; }
+}
+
+function renderStreak() {
+  const st = _loadDaily();
+  const n = st.streak || 0;
+  document.getElementById('daily-streak').innerHTML = '🔥 <b>' + n + '</b>';
+  const btn = document.getElementById('daily-done-btn');
+  if (st.last === _todayStr()) {
+    btn.textContent = "✓ Fait aujourd'hui"; btn.classList.add('done'); btn.disabled = true;
+  } else {
+    btn.textContent = "J'ai écrit aujourd'hui"; btn.classList.remove('done'); btn.disabled = false;
+  }
+}
+
+function markDailyDone() {
+  const st = _loadDaily();
+  const today = _todayStr();
+  if (st.last === today) return;
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  const yStr = y.getFullYear() + '-' + (y.getMonth() + 1) + '-' + y.getDate();
+  st.streak = (st.last === yStr) ? (st.streak || 0) + 1 : 1;
+  st.last = today;
+  localStorage.setItem(LS_DAILY, JSON.stringify(st));
+  renderStreak();
+}
+
 function showScreen(id) {
-  ['screen-select','screen-quiz','screen-result','screen-final'].forEach(s => {
+  ['screen-select','screen-daily','screen-quiz','screen-result','screen-final'].forEach(s => {
     document.getElementById(s).style.display = s === id ? 'block' : 'none';
   });
   window.scrollTo(0, 0);
