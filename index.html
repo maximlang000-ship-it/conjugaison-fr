@@ -924,6 +924,9 @@
         <li><b>-x</b> et non -s à je/tu : je peu<b>x</b>, je veu<b>x</b>, je vau<b>x</b>.</li>
         <li><b>aie / ait / aient</b> se prononcent pareil : qu'il <b>ait</b> (subjonctif) ≠ il <b>a</b> (indicatif).</li>
         <li><b>-yer / -ier / -ill / -gn</b> à l'imparfait & subjonctif (nous/vous) : un <b>i</b> muet s'ajoute — vous essu<b>yi</b>ez, vous étud<b>ii</b>ez, vous trava<b>illi</b>ez, nous cr<b>ii</b>ons.</li>
+        <li><b>-ger / -cer</b> : on garde le son devant a/o — nous man<b>ge</b>ons, je man<b>ge</b>ais, nous commen<b>ç</b>ons.</li>
+        <li><b>Futur & passé simple</b>, 3ᵉ pers. sing. : jamais de <b>-t</b> ! il chantera, il chanta (et non « chanterat »).</li>
+        <li><b>Participe passé avec être</b> : accord avec le sujet — elle est venu<b>e</b>, ils sont parti<b>s</b> (jamais « j'ai parti »).</li>
       </ul>
     </div>
 
@@ -1446,6 +1449,12 @@ const EXC = {
   // ── Imparfait / Subjonctif : le -i- muet après y (nous/vous) ──
   'Voir|Imparfait':          { hl:['yi'], rule:"À <b>nous</b> et <b>vous</b>, un <b>i</b> (presque muet) s'ajoute après le y : nous vo<b>yi</b>ons, vous vo<b>yi</b>ez. Même piège : essuyer → vous essu<b>yi</b>ez, payer → vous pa<b>yi</b>ez." },
   'Voir|Subjonctif présent': { hl:['yi'], rule:"Comme à l'imparfait, le -i- s'ajoute après le y à nous/vous : que nous vo<b>yi</b>ons, que vous vo<b>yi</b>ez (forme identique à l'imparfait)." },
+
+  // ── Participe passé : auxiliaire être (+ accord) et accent de « dû » ──
+  'Aller|Participe passé':  { hl:[],    rule:"Se conjugue avec <b>être</b> : je suis allé, elle est allé<b>e</b>, ils sont allé<b>s</b> (accord avec le sujet). Erreur classique : <i>j'ai allé</i>." },
+  'Venir|Participe passé':  { hl:[],    rule:"Auxiliaire <b>être</b> : je suis venu, elle est venu<b>e</b>, ils sont venu<b>s</b>. Jamais <i>j'ai venu</i>." },
+  'Partir|Participe passé': { hl:[],    rule:"Auxiliaire <b>être</b> : je suis parti, elle est parti<b>e</b>, ils sont parti<b>s</b>. Jamais <i>j'ai parti</i>." },
+  'Devoir|Participe passé': { hl:['û'], rule:"Accent circonflexe sur <b>dû</b> au masculin singulier seulement (pour le distinguer de « du »). Pas d'accent au féminin/pluriel : due, dus, dues." },
 
   // ── Passé simple : très irrégulier ──
   'Venir|Passé simple': { hl:['vin','vîn'], rule:"Passé simple très irrégulier en <b>-in-</b> : je vins, tu vins, il vint, nous vînmes, ils vinrent. (tenir suit le même modèle : je tins.)" },
