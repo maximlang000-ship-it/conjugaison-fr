@@ -739,6 +739,22 @@
     }
     .daily-done.done { background: var(--green); }
     .daily-done:disabled { opacity: 0.85; cursor: default; }
+
+    /* ── DAILY : écrire d'abord, révéler ensuite ─────────── */
+    .daily-cell { display: block; }
+    .daily-cell i { font-style: normal; }
+    .daily-cell .dp { color: var(--text-dim); }
+    .daily-cell .da { display: none; }
+    .daily-block.shown .daily-cell .dp { display: none; }
+    .daily-block.shown .daily-cell .da { display: inline; }
+    .daily-reveal {
+      margin-top: 8px; background: none; border: 1px solid var(--border);
+      color: var(--text-muted); padding: 7px 12px; border-radius: 10px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .daily-extra { display: none; margin-top: 8px; }
+    .daily-block.shown .daily-extra { display: block; }
   </style>
 </head>
 <body>
@@ -900,12 +916,13 @@
     </div>
 
     <div class="daily-card">
-      <div class="daily-card-title">✍️ Les muets à ne jamais oublier</div>
+      <div class="daily-card-title">✍️ Les pièges qui ne s'entendent pas</div>
       <ul class="daily-muet">
-        <li><b>-ent</b> (3ᵉ pers. pluriel) ne s'entend pas : ils parl<b>ent</b>, ils finiss<b>ent</b>.</li>
-        <li>Conditionnel = futur + <b>s</b> muet : je courr<b>ai</b> (futur) → je courr<b>ais</b> (conditionnel).</li>
-        <li>Subjonctif : terminaisons muettes <b>-e / -es / -ent</b> (que je parl<b>e</b>).</li>
-        <li>Doubles consonnes qu'on n'entend pas : cou<b>rr</b>ai, pou<b>rr</b>ai, ve<b>rr</b>ai.</li>
+        <li><b>Futur ≠ conditionnel</b> (même son !) : « je courr<b>ai</b> » (futur, certain) vs « je courr<b>ais</b> » (conditionnel, hypothèse) — le <b>-s</b> ne s'entend pas.</li>
+        <li><b>Doubles consonnes muettes</b> au futur/conditionnel : cou<b>rr</b>ai, pou<b>rr</b>ai, ve<b>rr</b>ai, mou<b>rr</b>ai.</li>
+        <li><b>Passé simple</b> (rare à l'oral, piégeux à l'écrit) : il v<b>in</b>t, il f<b>u</b>t, il p<b>u</b>t, nous f<b>î</b>mes.</li>
+        <li><b>-x</b> et non -s à je/tu : je peu<b>x</b>, je veu<b>x</b>, je vau<b>x</b>.</li>
+        <li><b>aie / ait / aient</b> se prononcent pareil : qu'il <b>ait</b> (subjonctif) ≠ il <b>a</b> (indicatif).</li>
       </ul>
     </div>
 
@@ -2052,11 +2069,45 @@ function _todayStr() {
   return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
 }
 
-function _dailyTable(verb, tense) {
+function _promptFor(card) {
+  if (card.tense === 'Impératif') {
+    return ({'2e pers. du singulier':'(tu)','1re pers. du pluriel':'(nous)','2e pers. du pluriel':'(vous)'})[card.person] || '';
+  }
+  if (!card.person) return '→';
+  const subj = card.tense === 'Subjonctif présent';
+  const m = {
+    '1re pers. du singulier': subj ? 'que je' : 'je',
+    '2e pers. du singulier':  subj ? 'que tu' : 'tu',
+    '3e pers. du singulier':  subj ? "qu'il" : 'il',
+    '1re pers. du pluriel':   subj ? 'que nous' : 'nous',
+    '2e pers. du pluriel':    subj ? 'que vous' : 'vous',
+    '3e pers. du pluriel':    subj ? "qu'ils" : 'ils'
+  };
+  return m[card.person] || '';
+}
+
+function dailyReveal(btn) {
+  const b = btn.closest('.daily-block');
+  const shown = b.classList.toggle('shown');
+  btn.textContent = shown ? '🙈 Cacher' : '👁 Voir les réponses';
+}
+
+function _writableBlock(verb, tense, opts) {
+  opts = opts || {};
   const cards = CARDS.filter(c => c.verb === verb && c.tense === tense);
   if (!cards.length) return '';
-  return '<div class="daily-conj">' +
-    cards.map(c => '<span>' + highlightAnswer(c) + '</span>').join('') +
+  const rows = cards.map(c =>
+    '<span class="daily-cell"><i class="dp">' + _promptFor(c) + ' …</i>' +
+    '<i class="da">' + highlightAnswer(c) + '</i></span>'
+  ).join('');
+  let extra = '';
+  if (opts.phraseCard) extra += '<div class="daily-phrase">🧠 ' + buildExample(opts.phraseCard) + '</div>';
+  if (opts.rule)       extra += '<div class="exc-text">' + opts.rule + '</div>';
+  return '<div class="daily-block">' +
+    '<div class="daily-tense">' + tense + ' — <b>' + verb + '</b></div>' +
+    '<div class="daily-conj">' + rows + '</div>' +
+    '<button class="daily-reveal" onclick="dailyReveal(this)">👁 Voir les réponses</button>' +
+    (extra ? '<div class="daily-extra">' + extra + '</div>' : '') +
     '</div>';
 }
 
@@ -2071,12 +2122,8 @@ function renderDaily() {
 
   let html = '';
   DAILY_HARD_TENSES.forEach(t => {
-    html += '<div class="daily-block">';
-    html += '<div class="daily-tense">' + t + ' — <b>' + verbe + '</b></div>';
-    html += _dailyTable(verbe, t);
     const card = CARDS.find(c => c.verb === verbe && c.tense === t && c.person === '1re pers. du singulier');
-    if (card) html += '<div class="daily-phrase">🧠 ' + buildExample(card) + '</div>';
-    html += '</div>';
+    html += _writableBlock(verbe, t, { phraseCard: card });
   });
   document.getElementById('daily-verb').innerHTML = html;
 
@@ -2084,11 +2131,8 @@ function renderDaily() {
   const keys = Object.keys(EXC);
   const key = keys[(di + 3) % keys.length];
   const parts = key.split('|');
-  const e = EXC[key];
-  let ph = '<div class="daily-tense">' + parts[0] + ' — ' + parts[1] + '</div>';
-  ph += _dailyTable(parts[0], parts[1]);
-  ph += '<div class="exc-text" style="margin-top:8px">' + e.rule + '</div>';
-  document.getElementById('daily-piege').innerHTML = ph;
+  document.getElementById('daily-piege').innerHTML =
+    _writableBlock(parts[0], parts[1], { rule: EXC[key].rule });
 
   renderStreak();
 }
