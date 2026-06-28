@@ -923,6 +923,7 @@
         <li><b>Passé simple</b> (rare à l'oral, piégeux à l'écrit) : il v<b>in</b>t, il f<b>u</b>t, il p<b>u</b>t, nous f<b>î</b>mes.</li>
         <li><b>-x</b> et non -s à je/tu : je peu<b>x</b>, je veu<b>x</b>, je vau<b>x</b>.</li>
         <li><b>aie / ait / aient</b> se prononcent pareil : qu'il <b>ait</b> (subjonctif) ≠ il <b>a</b> (indicatif).</li>
+        <li><b>-yer / -ier / -ill / -gn</b> à l'imparfait & subjonctif (nous/vous) : un <b>i</b> muet s'ajoute — vous essu<b>yi</b>ez, vous étud<b>ii</b>ez, vous trava<b>illi</b>ez, nous cr<b>ii</b>ons.</li>
       </ul>
     </div>
 
@@ -1441,6 +1442,10 @@ const EXC = {
   'Venir|Subjonctif présent':   { hl:['vienn'],         rule:"Double n au radical <b>vienn-</b> (que je vienne) au sg + 3ᵉ pl ; <b>ven-</b> à nous/vous (que nous venions)." },
   'Prendre|Subjonctif présent': { hl:['prenn'],         rule:"Double n : que je prenne, qu'ils prennent ; mais « que nous prenions » (un seul n)." },
   'Devoir|Subjonctif présent':  { hl:['doiv'],          rule:"Radical <b>doiv-</b> (que je doive) au sg + 3ᵉ pl ; « que nous devions » à nous/vous." },
+
+  // ── Imparfait / Subjonctif : le -i- muet après y (nous/vous) ──
+  'Voir|Imparfait':          { hl:['yi'], rule:"À <b>nous</b> et <b>vous</b>, un <b>i</b> (presque muet) s'ajoute après le y : nous vo<b>yi</b>ons, vous vo<b>yi</b>ez. Même piège : essuyer → vous essu<b>yi</b>ez, payer → vous pa<b>yi</b>ez." },
+  'Voir|Subjonctif présent': { hl:['yi'], rule:"Comme à l'imparfait, le -i- s'ajoute après le y à nous/vous : que nous vo<b>yi</b>ons, que vous vo<b>yi</b>ez (forme identique à l'imparfait)." },
 
   // ── Passé simple : très irrégulier ──
   'Venir|Passé simple': { hl:['vin','vîn'], rule:"Passé simple très irrégulier en <b>-in-</b> : je vins, tu vins, il vint, nous vînmes, ils vinrent. (tenir suit le même modèle : je tins.)" },
