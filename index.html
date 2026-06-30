@@ -755,6 +755,17 @@
     }
     .daily-extra { display: none; margin-top: 8px; }
     .daily-block.shown .daily-extra { display: block; }
+
+    /* ── FICHE RÉVISION (concordance des temps) ──────────── */
+    #screen-fiche { display: none; padding-bottom: 30px; }
+    .cc-rule { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px; }
+    .cc-rule b { color: var(--text); }
+    .cc-line {
+      font-size: 0.95rem; color: var(--text); line-height: 1.5;
+      padding: 7px 0; border-top: 1px solid var(--border);
+    }
+    .cc-line:first-child { border-top: none; }
+    .cc-line b { color: var(--blue); }
   </style>
 </head>
 <body>
@@ -769,6 +780,7 @@
     </div>
 
     <button class="daily-cta" onclick="showDaily()">📅 Ma routine du jour</button>
+    <button class="daily-cta" onclick="showFiche()" style="background:linear-gradient(135deg,#0ea5e9,var(--blue))">📖 Fiche révision — concordance des temps</button>
 
     <!-- Stats -->
     <div class="stats-box">
@@ -941,6 +953,39 @@
     </div>
 
     <button class="daily-done" id="daily-done-btn" onclick="markDailyDone()">J'ai écrit aujourd'hui</button>
+  </div>
+
+  <!-- ══════════ FICHE SCREEN ══════════ -->
+  <div id="screen-fiche">
+    <div class="header">
+      <span class="header-title">Conjugaison FR</span>
+      <button class="btn-back" onclick="showSelect()">← Menu</button>
+      <span class="header-meta"></span>
+    </div>
+
+    <div class="daily-intro">
+      <div class="daily-title">📖 Fiche révision</div>
+      <div class="daily-sub">Concordance des temps</div>
+      <div class="daily-note">Quel temps dans la subordonnée selon la principale ? <b>Recopie une règle par jour.</b></div>
+    </div>
+
+    <div class="daily-card">
+      <div class="daily-card-title">🔑 Le système du « si » (hypothèse)</div>
+      <div class="cc-rule">Après « <b>si</b> », jamais de futur ni de conditionnel : le « -rais » va dans l'<b>autre</b> partie de la phrase.</div>
+      <div id="fiche-si"></div>
+    </div>
+
+    <div class="daily-card">
+      <div class="daily-card-title">🗣️ Discours rapporté (la principale passe au passé)</div>
+      <div class="cc-rule">Quand la principale est au passé, la subordonnée <b>recule d'un cran</b> : présent → imparfait, futur → conditionnel, passé composé → plus-que-parfait.</div>
+      <div id="fiche-disc"></div>
+    </div>
+
+    <div class="daily-card">
+      <div class="daily-card-title">🎯 Le subjonctif dans la subordonnée</div>
+      <div class="cc-rule">Volonté, doute, émotion, nécessité (vouloir, falloir, craindre que…) → <b>subjonctif</b>, quel que soit le temps de la principale.</div>
+      <div id="fiche-subj"></div>
+    </div>
   </div>
 
   <!-- ══════════ QUIZ SCREEN ══════════ -->
@@ -3618,8 +3663,53 @@ function markDailyDone() {
   renderStreak();
 }
 
+// ════════════════════════════════════════════════════════
+//  FICHE RÉVISION — CONCORDANCE DES TEMPS
+//  Phrases vérifiées à la main, verbe pivot tournant chaque jour.
+// ════════════════════════════════════════════════════════
+
+const CONCORD = [
+  { si: [
+      "Si j'ai le temps, je <b>viendrai</b>.",
+      "Si j'avais le temps, je <b>viendrais</b>.",
+      "Si j'avais eu le temps, je <b>serais venu</b>." ],
+    disc: [
+      "Il dit qu'il <b>vient</b>  →  Il a dit qu'il <b>venait</b>.",
+      "Il dit qu'il <b>viendra</b>  →  Il a dit qu'il <b>viendrait</b>.",
+      "Il dit qu'il <b>est venu</b>  →  Il a dit qu'il <b>était venu</b>." ],
+    subj: "Je veux / Je voulais <b>qu'il vienne</b>." },
+  { si: [
+      "Si j'ai le temps, je <b>partirai</b>.",
+      "Si j'avais le temps, je <b>partirais</b>.",
+      "Si j'avais eu le temps, je <b>serais parti</b>." ],
+    disc: [
+      "Il dit qu'il <b>part</b>  →  Il a dit qu'il <b>partait</b>.",
+      "Il dit qu'il <b>partira</b>  →  Il a dit qu'il <b>partirait</b>.",
+      "Il dit qu'il <b>est parti</b>  →  Il a dit qu'il <b>était parti</b>." ],
+    subj: "Je veux / Je voulais <b>qu'il parte</b>." },
+  { si: [
+      "Si j'ai le temps, j'<b>arriverai</b>.",
+      "Si j'avais le temps, j'<b>arriverais</b>.",
+      "Si j'avais eu le temps, je <b>serais arrivé</b>." ],
+    disc: [
+      "Il dit qu'il <b>arrive</b>  →  Il a dit qu'il <b>arrivait</b>.",
+      "Il dit qu'il <b>arrivera</b>  →  Il a dit qu'il <b>arriverait</b>.",
+      "Il dit qu'il <b>est arrivé</b>  →  Il a dit qu'il <b>était arrivé</b>." ],
+    subj: "Je veux / Je voulais <b>qu'il arrive</b>." }
+];
+
+function showFiche() { renderFiche(); showScreen('screen-fiche'); }
+
+function renderFiche() {
+  const c = CONCORD[_dayIndex() % CONCORD.length];
+  const lines = arr => arr.map(s => '<div class="cc-line">' + s + '</div>').join('');
+  document.getElementById('fiche-si').innerHTML   = lines(c.si);
+  document.getElementById('fiche-disc').innerHTML = lines(c.disc);
+  document.getElementById('fiche-subj').innerHTML = lines([c.subj]);
+}
+
 function showScreen(id) {
-  ['screen-select','screen-daily','screen-quiz','screen-result','screen-final'].forEach(s => {
+  ['screen-select','screen-daily','screen-fiche','screen-quiz','screen-result','screen-final'].forEach(s => {
     document.getElementById(s).style.display = s === id ? 'block' : 'none';
   });
   window.scrollTo(0, 0);
