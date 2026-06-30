@@ -760,12 +760,14 @@
     #screen-fiche { display: none; padding-bottom: 30px; }
     .cc-rule { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px; }
     .cc-rule b { color: var(--text); }
-    .cc-line {
-      font-size: 0.95rem; color: var(--text); line-height: 1.5;
-      padding: 7px 0; border-top: 1px solid var(--border);
+    .cc-item { padding: 9px 0; border-top: 1px solid var(--border); }
+    .cc-item:first-child { border-top: none; }
+    .cc-label {
+      font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--blue); margin-bottom: 3px;
     }
-    .cc-line:first-child { border-top: none; }
-    .cc-line b { color: var(--blue); }
+    .cc-line { font-size: 0.95rem; color: var(--text); line-height: 1.5; }
+    .cc-line b { color: var(--text); font-weight: 800; }
     /* ── VERSION ─────────────────────────────────────────── */
     .app-version {
       display: inline-block; font-size: 0.62rem; font-weight: 800;
@@ -3707,12 +3709,24 @@ const CONCORD = [
 
 function showFiche() { renderFiche(); showScreen('screen-fiche'); }
 
+const CC_LABELS = {
+  si:   ["Si + présent → futur", "Si + imparfait → conditionnel présent", "Si + plus-que-parfait → conditionnel passé"],
+  disc: ["présent → imparfait", "futur → conditionnel", "passé composé → plus-que-parfait"],
+  subj: ["quel que soit le temps de la principale → subjonctif"]
+};
+
+function _ccBlock(arr, labels) {
+  return arr.map((s, i) =>
+    '<div class="cc-item"><div class="cc-label">' + (labels[i] || '') + '</div>' +
+    '<div class="cc-line">' + s + '</div></div>'
+  ).join('');
+}
+
 function renderFiche() {
   const c = CONCORD[_dayIndex() % CONCORD.length];
-  const lines = arr => arr.map(s => '<div class="cc-line">' + s + '</div>').join('');
-  document.getElementById('fiche-si').innerHTML   = lines(c.si);
-  document.getElementById('fiche-disc').innerHTML = lines(c.disc);
-  document.getElementById('fiche-subj').innerHTML = lines([c.subj]);
+  document.getElementById('fiche-si').innerHTML   = _ccBlock(c.si, CC_LABELS.si);
+  document.getElementById('fiche-disc').innerHTML = _ccBlock(c.disc, CC_LABELS.disc);
+  document.getElementById('fiche-subj').innerHTML = _ccBlock([c.subj], CC_LABELS.subj);
 }
 
 function showScreen(id) {
@@ -3727,7 +3741,7 @@ function updateProgress() {
   document.getElementById('card-counter').textContent  = (current + 1) + ' / ' + totalCards;
 }
 
-const APP_VERSION = 'v20';
+const APP_VERSION = 'v21';
 document.querySelectorAll('.header-title').forEach(function (e) {
   const s = document.createElement('span');
   s.className = 'app-version';
