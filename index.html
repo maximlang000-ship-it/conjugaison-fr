@@ -766,6 +766,11 @@
     }
     .cc-line:first-child { border-top: none; }
     .cc-line b { color: var(--blue); }
+    /* ── VERSION ─────────────────────────────────────────── */
+    .app-version {
+      font-size: 0.6rem; font-weight: 700; color: var(--text-dim);
+      vertical-align: super; margin-left: 5px; letter-spacing: 0.02em;
+    }
   </style>
 </head>
 <body>
@@ -3719,6 +3724,14 @@ function updateProgress() {
   document.getElementById('progress-fill').style.width = (current / totalCards * 100) + '%';
   document.getElementById('card-counter').textContent  = (current + 1) + ' / ' + totalCards;
 }
+
+const APP_VERSION = 'v19';
+document.querySelectorAll('.header-title').forEach(function (e) {
+  const s = document.createElement('span');
+  s.className = 'app-version';
+  s.textContent = APP_VERSION;
+  e.appendChild(s);
+});
 
 showSelect();
 
