@@ -768,8 +768,10 @@
     .cc-line b { color: var(--blue); }
     /* ── VERSION ─────────────────────────────────────────── */
     .app-version {
-      font-size: 0.6rem; font-weight: 700; color: var(--text-dim);
-      vertical-align: super; margin-left: 5px; letter-spacing: 0.02em;
+      display: inline-block; font-size: 0.62rem; font-weight: 800;
+      color: #fff; background: var(--blue);
+      padding: 1px 7px; border-radius: 9px; margin-left: 7px;
+      vertical-align: middle; letter-spacing: 0.02em;
     }
   </style>
 </head>
@@ -3725,7 +3727,7 @@ function updateProgress() {
   document.getElementById('card-counter').textContent  = (current + 1) + ' / ' + totalCards;
 }
 
-const APP_VERSION = 'v19';
+const APP_VERSION = 'v20';
 document.querySelectorAll('.header-title').forEach(function (e) {
   const s = document.createElement('span');
   s.className = 'app-version';
@@ -3736,6 +3738,13 @@ document.querySelectorAll('.header-title').forEach(function (e) {
 showSelect();
 
 if ('serviceWorker' in navigator) {
+  let _reloading = false;
+  const _hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (_reloading || !_hadController) return;
+    _reloading = true;
+    window.location.reload();
+  });
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
 }
 </script>
