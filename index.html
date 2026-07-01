@@ -771,6 +771,28 @@
     }
     .cc-line { font-size: 1.02rem; color: var(--text); line-height: 1.6; }
     .cc-line b { color: var(--blue); font-weight: 800; }
+    .cc-modeblock { font-size: 0.9rem; line-height: 1.6; color: var(--text); margin-bottom: 9px; }
+    .cc-modetag {
+      display: inline-block; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.05em;
+      padding: 2px 8px; border-radius: 12px; margin-right: 7px; vertical-align: 2px;
+    }
+    .cc-tag-sub { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue-border); }
+    .cc-tag-ind { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid var(--green); }
+    .cc-piege {
+      margin-top: 10px; font-size: 0.82rem; color: var(--amber);
+      background: rgba(245,158,11,0.08); border-left: 3px solid var(--amber);
+      border-radius: 0 8px 8px 0; padding: 8px 10px; line-height: 1.5;
+    }
+    .cc-piege b { color: var(--amber); }
+    .cc-bad { margin-top: 10px; font-size: 0.88rem; color: var(--red); }
+    .cc-bad s { opacity: 0.85; }
+    .cc-note { font-size: 0.82rem; color: var(--text-muted); }
+    .cc-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin-top: 4px; }
+    .cc-table td { padding: 8px 8px; border-top: 1px solid var(--border); }
+    .cc-table tr:first-child td { border-top: none; }
+    .cc-table td:first-child { color: var(--text-muted); }
+    .cc-table td:nth-child(2) { color: var(--blue); text-align: center; width: 26px; font-weight: 800; }
+    .cc-table td:last-child { color: var(--text); font-weight: 800; }
     /* ── VERSION ─────────────────────────────────────────── */
     .app-version {
       display: inline-block; font-size: 0.62rem; font-weight: 800;
@@ -978,25 +1000,60 @@
     <div class="daily-intro">
       <div class="daily-title">📖 Fiche révision</div>
       <div class="daily-sub">Concordance des temps</div>
-      <div class="daily-note">Quel temps dans la subordonnée selon la principale ? <b>Recopie une règle par jour.</b></div>
+      <div class="daily-note">Quel temps dans la subordonnée ? <b>Recopie une section par jour.</b></div>
     </div>
 
     <div class="daily-card">
-      <div class="daily-card-title">🔑 Le système du « si » (hypothèse)</div>
-      <div class="cc-rule">Après « <b>si</b> », jamais de futur ni de conditionnel : le « -rais » va dans l'<b>autre</b> partie de la phrase.</div>
-      <div id="fiche-si"></div>
+      <div class="daily-card-title">🧭 1. Subjonctif ou indicatif ?</div>
+      <div class="cc-rule">C'est le mot qui <b>introduit</b> la subordonnée qui décide du mode.</div>
+      <div class="cc-modeblock">
+        <span class="cc-modetag cc-tag-sub">SUBJONCTIF</span>
+        il faut que · vouloir que · refuser que · bien que · avant que · pour que · sans que · il est important / anormal / indispensable que
+      </div>
+      <div class="cc-modeblock">
+        <span class="cc-modetag cc-tag-ind">INDICATIF</span>
+        (être) certain que · il s'agit de · ce que · après que
+      </div>
+      <div class="cc-piege">⚠️ Piège : « <b>certain que</b> » → indicatif, mais « <b>pas certain / incertain que</b> » → subjonctif.</div>
     </div>
 
     <div class="daily-card">
-      <div class="daily-card-title">🗣️ Discours rapporté (la principale passe au passé)</div>
-      <div class="cc-rule">Quand la principale est au passé, la subordonnée <b>recule d'un cran</b> : présent → imparfait, futur → conditionnel, passé composé → plus-que-parfait.</div>
-      <div id="fiche-disc"></div>
+      <div class="daily-card-title">🔁 2. Double subjonctif</div>
+      <div class="cc-rule">Deux déclencheurs dans la même phrase → <b>deux</b> subjonctifs.</div>
+      <div class="cc-line">Il faut <b>que vous soyez</b> là avant <b>que la réunion commence</b>.</div>
+      <div class="cc-line" style="margin-top:9px">Bien <b>qu'il soit</b> tard, il est important <b>que vous passiez</b>.</div>
     </div>
 
     <div class="daily-card">
-      <div class="daily-card-title">🎯 Le subjonctif dans la subordonnée</div>
-      <div class="cc-rule">Volonté, doute, émotion, nécessité (vouloir, falloir, craindre que…) → <b>subjonctif</b>, quel que soit le temps de la principale.</div>
-      <div id="fiche-subj"></div>
+      <div class="daily-card-title">♾️ 3. Toutes les principales → subjonctif</div>
+      <div class="cc-rule">Après un déclencheur de subjonctif, le subjonctif <b>reste</b> — quel que soit le temps de la principale (présent, imparfait, passé composé, conditionnel…).</div>
+      <div class="cc-line">Je ne souhaitais pas / n'ai pas souhaité / ne souhaiterais pas <b>que tu sois averti</b>.</div>
+    </div>
+
+    <div class="daily-card">
+      <div class="daily-card-title">🔑 4. L'hypothèse avec « si »</div>
+      <div class="cc-rule">Jamais de futur ni de conditionnel juste après « <b>si</b> ».</div>
+      <div class="cc-item"><div class="cc-label">si + présent → futur</div><div class="cc-line">Si j'ai le temps, je <b>viendrai</b>.</div></div>
+      <div class="cc-item"><div class="cc-label">si + imparfait → conditionnel</div><div class="cc-line">Si j'avais le temps, je <b>viendrais</b>.</div></div>
+      <div class="cc-bad">❌ Jamais : <s>si je viendrais</s>.</div>
+    </div>
+
+    <div class="daily-card">
+      <div class="daily-card-title">⏪ 5. Le futur dans le passé</div>
+      <div class="cc-rule">Verbe introducteur au passé → le futur devient <b>conditionnel</b>.</div>
+      <div class="cc-line">Il nous a dit qu'il <b>viendrait</b>. <span class="cc-note">(≠ « qu'il viendra »)</span></div>
+      <div class="cc-line" style="margin-top:9px">Les journalistes avaient annoncé qu'un accord <b>interviendrait</b>.</div>
+    </div>
+
+    <div class="daily-card">
+      <div class="daily-card-title">📋 6. Discours indirect au passé</div>
+      <div class="cc-rule">Quand on rapporte au passé, chaque temps <b>recule d'un cran</b> :</div>
+      <table class="cc-table">
+        <tr><td>présent</td><td>→</td><td>imparfait</td></tr>
+        <tr><td>futur</td><td>→</td><td>conditionnel</td></tr>
+        <tr><td>passé composé</td><td>→</td><td>plus-que-parfait</td></tr>
+        <tr><td>impératif</td><td>→</td><td>infinitif (de + inf.)</td></tr>
+      </table>
     </div>
   </div>
 
@@ -3676,61 +3733,10 @@ function markDailyDone() {
 }
 
 // ════════════════════════════════════════════════════════
-//  FICHE RÉVISION — CONCORDANCE DES TEMPS
-//  Phrases vérifiées à la main, verbe pivot tournant chaque jour.
+//  FICHE RÉVISION — CONCORDANCE DES TEMPS (contenu statique)
 // ════════════════════════════════════════════════════════
 
-const CONCORD = [
-  { si: [
-      "Si j'ai le temps, je <b>viendrai</b>.",
-      "Si j'avais le temps, je <b>viendrais</b>.",
-      "Si j'avais eu le temps, je <b>serais venu</b>." ],
-    disc: [
-      "Il dit qu'il <b>vient</b>  →  Il a dit qu'il <b>venait</b>.",
-      "Il dit qu'il <b>viendra</b>  →  Il a dit qu'il <b>viendrait</b>.",
-      "Il dit qu'il <b>est venu</b>  →  Il a dit qu'il <b>était venu</b>." ],
-    subj: "Je veux / Je voulais <b>qu'il vienne</b>." },
-  { si: [
-      "Si j'ai le temps, je <b>partirai</b>.",
-      "Si j'avais le temps, je <b>partirais</b>.",
-      "Si j'avais eu le temps, je <b>serais parti</b>." ],
-    disc: [
-      "Il dit qu'il <b>part</b>  →  Il a dit qu'il <b>partait</b>.",
-      "Il dit qu'il <b>partira</b>  →  Il a dit qu'il <b>partirait</b>.",
-      "Il dit qu'il <b>est parti</b>  →  Il a dit qu'il <b>était parti</b>." ],
-    subj: "Je veux / Je voulais <b>qu'il parte</b>." },
-  { si: [
-      "Si j'ai le temps, j'<b>arriverai</b>.",
-      "Si j'avais le temps, j'<b>arriverais</b>.",
-      "Si j'avais eu le temps, je <b>serais arrivé</b>." ],
-    disc: [
-      "Il dit qu'il <b>arrive</b>  →  Il a dit qu'il <b>arrivait</b>.",
-      "Il dit qu'il <b>arrivera</b>  →  Il a dit qu'il <b>arriverait</b>.",
-      "Il dit qu'il <b>est arrivé</b>  →  Il a dit qu'il <b>était arrivé</b>." ],
-    subj: "Je veux / Je voulais <b>qu'il arrive</b>." }
-];
-
-function showFiche() { renderFiche(); showScreen('screen-fiche'); }
-
-const CC_LABELS = {
-  si:   ["Si + présent → futur", "Si + imparfait → conditionnel présent", "Si + plus-que-parfait → conditionnel passé"],
-  disc: ["présent → imparfait", "futur → conditionnel", "passé composé → plus-que-parfait"],
-  subj: ["quel que soit le temps de la principale → subjonctif"]
-};
-
-function _ccBlock(arr, labels) {
-  return arr.map((s, i) =>
-    '<div class="cc-item"><div class="cc-label">' + (labels[i] || '') + '</div>' +
-    '<div class="cc-line">' + s + '</div></div>'
-  ).join('');
-}
-
-function renderFiche() {
-  const c = CONCORD[_dayIndex() % CONCORD.length];
-  document.getElementById('fiche-si').innerHTML   = _ccBlock(c.si, CC_LABELS.si);
-  document.getElementById('fiche-disc').innerHTML = _ccBlock(c.disc, CC_LABELS.disc);
-  document.getElementById('fiche-subj').innerHTML = _ccBlock([c.subj], CC_LABELS.subj);
-}
+function showFiche() { showScreen('screen-fiche'); }
 
 function showScreen(id) {
   ['screen-select','screen-daily','screen-fiche','screen-quiz','screen-result','screen-final'].forEach(s => {
@@ -3744,7 +3750,7 @@ function updateProgress() {
   document.getElementById('card-counter').textContent  = (current + 1) + ' / ' + totalCards;
 }
 
-const APP_VERSION = 'v22';
+const APP_VERSION = 'v23';
 document.querySelectorAll('.header-title').forEach(function (e) {
   const s = document.createElement('span');
   s.className = 'app-version';
