@@ -16,25 +16,30 @@
  * → crayon → Version « Nouvelle version » → Déployer (l'URL reste la même).
  */
 
-function doPost(e) { return handle(e); }
-function doGet(e)  { return handle(e); }
+function doPost(e) { return handlePost(e); }
+function doGet() {
+  return json({ ok: true, service: 'Conjugaison FR sync', write: false });
+}
 
-function handle(e) {
+function handlePost(e) {
+  var data;
+  try {
+    if (!e || !e.postData || !e.postData.contents) {
+      throw new Error('Payload manquant');
+    }
+    data = JSON.parse(e.postData.contents);
+    if (!validPayload(data)) throw new Error('Payload invalide');
+  } catch (err) {
+    return json({ ok: false, error: String(err) });
+  }
+
   var lock = LockService.getScriptLock();
   try { lock.waitLock(20000); } catch (err) {}
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-
-    var data = {};
-    if (e && e.postData && e.postData.contents) {
-      data = JSON.parse(e.postData.contents);
-    } else if (e && e.parameter && e.parameter.payload) {
-      data = JSON.parse(e.parameter.payload);
-    }
-
-    var stats  = data.stats  || {};
-    var device = data.device || 'inconnu';
-    var ts     = data.ts     || new Date().toISOString();
+    var stats  = data.stats;
+    var device = data.device;
+    var ts     = data.ts;
 
     // Total global
     var totalN = 0, totalOk = 0;
@@ -72,6 +77,42 @@ function handle(e) {
   } finally {
     try { lock.releaseLock(); } catch (err) {}
   }
+}
+
+function validPayload(data) {
+  if (!isObject(data) ||
+      typeof data.device !== 'string' || !/^dev-[a-z0-9]{6}$/.test(data.device) ||
+      !isIsoTimestamp(data.ts) ||
+      !isObject(data.stats) || !isObject(data.stats.tense) || !isObject(data.stats.verb)) {
+    return false;
+  }
+  return validStatsGroup(data.stats.tense) && validStatsGroup(data.stats.verb);
+}
+
+function validStatsGroup(group) {
+  var keys = Object.keys(group);
+  if (keys.length > 100) return false;
+  return keys.every(function (key) {
+    var item = group[key];
+    return key.length > 0 && key.length <= 100 && !/^[=+\-@]/.test(key) && isObject(item) &&
+      isCounter(item.ok) && isCounter(item.n) && item.ok <= item.n;
+  });
+}
+
+function isIsoTimestamp(value) {
+  if (typeof value !== 'string' ||
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)) return false;
+  var date = new Date(value);
+  return !isNaN(date.getTime()) && date.toISOString() === value;
+}
+
+function isCounter(value) {
+  return typeof value === 'number' && isFinite(value) &&
+    value >= 0 && Math.floor(value) === value;
+}
+
+function isObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 function writeSummary(ss, name, data) {

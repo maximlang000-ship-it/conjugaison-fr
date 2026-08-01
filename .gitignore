@@ -1,0 +1,22 @@
+# Fichiers Python locaux
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.tmp/
+
+# Sorties régénérables
+/cards_output.js
+/target_cards.js
+/trained_model-fr.*
+/verbecc.log
+
+# Sources et notes de transfert conservées localement
+/conjugaison_français.txt
+/TRANSFERT.md
+
+# Fichiers système et éditeurs
+.DS_Store
+Thumbs.db
+*.swp
+*~
