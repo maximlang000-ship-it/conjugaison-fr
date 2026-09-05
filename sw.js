@@ -1,4 +1,4 @@
-const CACHE = 'conjugaison-v29';
+const CACHE = 'conjugaison-v30';
 const ASSETS = ['./', './index.html', './learning.js', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

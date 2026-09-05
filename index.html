@@ -3944,9 +3944,10 @@ const DECK_TRAP_VERBS = [...new Set(Object.keys(EXC).map(k => k.split('|')[0]))]
 const DAILY_POOL = [...DECK_TRAP_VERBS, ...Object.keys(DAILY_VERBS)];
 
 function _dailyPrompts(tense) {
-  return tense === 'Subjonctif présent'
-    ? ['que je','que tu',"qu'il",'que nous','que vous',"qu'ils"]
-    : ['je','tu','il','nous','vous','ils'];
+  return tense === 'Impératif'
+    ? ['2e pers. du singulier', '1re pers. du pluriel', '2e pers. du pluriel']
+    : ['1re pers. du singulier', '2e pers. du singulier', '3e pers. du singulier',
+       '1re pers. du pluriel', '2e pers. du pluriel', '3e pers. du pluriel'];
 }
 
 // 6 formes d'un verbe à un temps (pool élargi ou deck)
@@ -3963,13 +3964,14 @@ function _dailyTrap(verb) {
   return { tense: k.split('|')[1], hl: EXC[k].hl, rule: EXC[k].rule };
 }
 
-// bloc à recopier : amorces visibles, réponses (+ surlignage piège) cachées
+// Consigne directe : verbe, temps et personnes, puis réponses à révéler.
 function _dailyBlock(verb, tense, hlArr, extraHtml) {
   const forms = _dailyForms(verb, tense);
   if (!forms.length) return '';
-  const pr = forms.length === 6 ? _dailyPrompts(tense) : forms.map(() => '');
+  const pr = forms.length === 6 || tense === 'Impératif'
+    ? _dailyPrompts(tense) : forms.map(() => 'Forme verbale');
   const rows = forms.map((f, i) =>
-    '<span class="daily-cell"><i class="dp">' + (pr[i] ? pr[i] + ' …' : '…') + '</i>' +
+    '<span class="daily-cell"><i class="dp">' + pr[i] + '</i>' +
     '<i class="da">' + _hl(f, hlArr) + '</i></span>'
   ).join('');
   return '<div class="daily-block">' +
@@ -4060,7 +4062,7 @@ function updateProgress() {
   document.getElementById('card-counter').textContent  = (current + 1) + ' / ' + totalCards;
 }
 
-const APP_VERSION = 'v29';
+const APP_VERSION = 'v30';
 document.querySelectorAll('.header-title').forEach(function (e) {
   const s = document.createElement('span');
   s.className = 'app-version';

@@ -22,7 +22,7 @@ triviaux (« ils mangent → -ent »).
 - **À CHAQUE déploiement, bumper DEUX numéros de version** (sinon le service worker ressert l'ancien cache et le téléphone ne voit rien) :
   1. `sw.js` : `const CACHE = 'conjugaison-vN'` → `vN+1`
   2. `index.html` : `const APP_VERSION = 'vN'` → `vN+1` (affiché en pastille bleue en haut de chaque écran)
-- Version applicative : **v29**. Git utilise ses propres identifiants ; un échec de `gh auth status` ne suffit pas à conclure que le push est bloqué.
+- Version applicative : **v30**. Git utilise ses propres identifiants ; un échec de `gh auth status` ne suffit pas à conclure que le push est bloqué.
 - Depuis v20, un handler `controllerchange` **recharge l'app automatiquement** quand un nouveau SW prend la main → l'utilisateur n'a plus à rouvrir manuellement.
 
 ---
@@ -130,6 +130,8 @@ Vérifications : `python -B -m unittest discover`, les trois checks de générat
 - Écran quiz volontairement compact pour tenir sur un écran de téléphone avec le clavier ouvert.
 
 ---
+
+La routine du jour suit aussi le format direct depuis v30 : verbe, temps, personne (« 1re pers. du singulier »), jamais une amorce « je … » ni une phrase à trous. Les exemples et réponses restent derrière le bouton de révélation.
 
 ## 9. Pistes non faites
 

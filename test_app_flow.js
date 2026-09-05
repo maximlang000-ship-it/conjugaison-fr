@@ -61,4 +61,13 @@ assert.equal(run('srsData[cardId(card)].due-lastReview.now'),600000);
 assert.equal(run('score'),0);
 run('nextCard()');
 assert.equal(nodes.get('screen-final').style.display,'block');
+// Toutes les consignes de la routine : personne explicite, aucun blanc à compléter.
+const dailyPrompts = run(String.raw`DAILY_POOL.flatMap(verb => [...new Set([
+  ...DAILY_HARD_TENSES, _dailyTrap(verb)?.tense
+].filter(Boolean))].flatMap(tense => [..._dailyBlock(verb, tense, null, '').matchAll(/<i class="dp">([^<]*)<\/i>/g)].map(m=>m[1])))`);
+assert.ok(dailyPrompts.length > 0);
+for (const prompt of dailyPrompts) {
+  assert.doesNotMatch(prompt, /…|_{2,}|\.{3}/);
+  assert.match(prompt, /pers\. du|Forme verbale/);
+}
 console.log('OK: démarrage app, filtres, quiz, double validation, boutons, aide refermée, erreur et bilan');
