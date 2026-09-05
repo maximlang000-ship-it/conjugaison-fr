@@ -206,7 +206,7 @@ def validate_source(data: dict[str, Any]) -> None:
             errors.append(f"{where}: compétence inconnue {skill!r}")
 
         wave = card.get("wave")
-        if wave not in {"A", "B", "C"}:
+        if wave not in {"A", "B", "C", "D"}:
             errors.append(f"{where}: vague inconnue {wave!r}")
         else:
             wave_counts[wave] += 1
@@ -314,6 +314,27 @@ def validate_source(data: dict[str, Any]) -> None:
         raise ValueError("Source golden des temps composés invalide:\n- " + "\n- ".join(errors))
 
 
+def trap_kinds(raw: dict[str, Any]) -> list[str]:
+    """Critères explicites portant sur la forme, indépendants de la présence d'un conseil."""
+    kinds = []
+    if raw["skill"] in {"accord_etre", "accord_cod_avant"}:
+        kinds.append(raw["skill"])
+    irregular_pp = {
+        "Avoir", "Être", "Acquérir", "Boire", "Conduire", "Connaître",
+        "Courir", "Craindre", "Croire", "Cueillir", "Devoir", "Dire",
+        "Écrire", "Faire", "Joindre", "Lire", "Mettre", "Mourir", "Naître",
+        "Ouvrir", "Pouvoir", "Prendre", "Recevoir", "Résoudre", "Savoir",
+        "Suivre", "Tenir", "Valoir", "Venir", "Vivre", "Voir", "Vouloir",
+    }
+    if raw["verb"] in irregular_pp:
+        kinds.append("participe_irregulier")
+    if raw["tense"] in {"Futur antérieur", "Conditionnel passé"} and raw["person"] == "1re pers. du singulier":
+        kinds.append("homophonie_auxiliaire")
+    if raw["tense"] == "Subjonctif passé":
+        kinds.append("subjonctif_auxiliaire")
+    return kinds
+
+
 def build_cards(data: dict[str, Any]) -> list[dict[str, Any]]:
     cards: list[dict[str, Any]] = []
     for raw in data["cards"]:
@@ -343,7 +364,10 @@ def build_cards(data: dict[str, Any]) -> list[dict[str, Any]]:
             "skill": raw["skill"],
             "wave": raw["wave"],
             "compound": True,
+            "trapKinds": trap_kinds(raw),
         }
+        if raw.get("subjectHint"):
+            card["subjectHint"] = raw["subjectHint"]
         for field in ("answerVariants", "gradedVariants"):
             if raw.get(field):
                 card[field] = raw[field]

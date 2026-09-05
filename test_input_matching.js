@@ -9,6 +9,13 @@ if (start < 0 || end < 0) throw new Error('Fonctions de comparaison introuvables
 // Exécute exactement les helpers livrés par index.html, sans recopier leur logique.
 eval(index.slice(start, end));
 
+const promptHelpersStart = index.indexOf('function compoundSubject(');
+const promptHelpersEnd = index.indexOf('//  INTERACTIONS QUIZ', promptHelpersStart);
+if (promptHelpersStart < 0 || promptHelpersEnd < 0) {
+  throw new Error('Helpers de consigne des temps composés introuvables');
+}
+eval(index.slice(promptHelpersStart, promptHelpersEnd));
+
 function accepted(input, answer, variants = []) {
   return _isAcceptedVerbAnswer(input, { answer, answerVariants: variants });
 }
@@ -51,6 +58,12 @@ const compoundCases = [
   ['négation simple ignorée', 'je n’ai pas écrit', 'j’ai écrit', 'ai écrit', [], true],
   ['négation renforcée ignorée', 'je n’ai plus jamais écrit', 'j’ai écrit', 'ai écrit', [], true],
   ['adverbes usuels ignorés', 'j’ai déjà bien écrit', 'j’ai écrit', 'ai écrit', [], true],
+  ['quantité ignorée', 'j’ai beaucoup écrit', 'j’ai écrit', 'ai écrit', [], true],
+  ['intensité ignorée', 'j’ai très bien écrit', 'j’ai écrit', 'ai écrit', [], true],
+  ['modalité ignorée', 'j’ai probablement écrit', 'j’ai écrit', 'ai écrit', [], true],
+  ['rien ignoré', 'je n’ai rien écrit', 'j’ai écrit', 'ai écrit', [], true],
+  ['négation avec mauvais temps refusée', 'je n’avais rien écrit', 'j’ai écrit', 'ai écrit', [], false],
+  ['verbe intercalé refusé', 'j’ai voulu écrit', 'j’ai écrit', 'ai écrit', [], false],
   ['pronom inversé ignoré', 'ai-je écrit ?', 'j’ai écrit', 'ai écrit', [], true],
   ['t euphonique et pronom ignorés', 'a-t-il écrit ?', 'il a écrit', 'a écrit', [], true],
   ['autre élément verbal refusé', 'le texte a été écrit', 'il a écrit', 'a écrit', [], false],
@@ -71,4 +84,24 @@ if (escaped !== '&lt;img src=x onerror=alert(1)&gt; &amp; &quot;&#39;') {
   throw new Error(`échappement HTML altéré : ${escaped}`);
 }
 
-console.log(`OK: ${simpleCases.length + compoundCases.length} cas de comparaison + échappement HTML`);
+const promptCases = [
+  ['sujet extrait sans révéler la forme', {compound:true, answer:'elle est venue', gradedForm:'est venue'}, 'elle'],
+  ['subjonctif conservé dans le sujet', {compound:true, answer:'qu’elles aient prises', gradedForm:'aient prises'}, 'qu’elles'],
+  ['carte simple sans sujet ajouté', {answer:'elle vient'}, ''],
+];
+for (const [label, card, expected] of promptCases) {
+  const actual = compoundSubject(card);
+  if (actual !== expected) throw new Error(`${label}: ${actual}, attendu ${expected}`);
+}
+
+const agreementCases = [
+  ['COD féminin pluriel', {verb:'Lire', skill:'accord_cod_avant', gradedForm:'ai lues'}, 'COD féminin pluriel avant le verbe'],
+  ['COD féminin singulier', {verb:'Recevoir', skill:'accord_cod_avant', gradedForm:'ayons reçue'}, 'COD féminin singulier avant le verbe'],
+  ['faire sans infinitif', {verb:'Faire', skill:'accord_cod_avant', gradedForm:'ont faites'}, 'COD féminin pluriel avant le verbe, sans infinitif après'],
+];
+for (const [label, card, expected] of agreementCases) {
+  const actual = compoundAgreementContext(card);
+  if (actual !== expected) throw new Error(`${label}: ${actual}, attendu ${expected}`);
+}
+
+console.log(`OK: ${simpleCases.length + compoundCases.length} cas de comparaison + ${promptCases.length + agreementCases.length} consignes + échappement HTML`);

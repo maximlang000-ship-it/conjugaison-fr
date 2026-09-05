@@ -97,10 +97,10 @@ class CompoundPackTests(unittest.TestCase):
         )
 
     def test_reviewed_counts_per_wave_and_tense(self):
-        self.assertEqual(len(self.cards), 210)
+        self.assertEqual(len(self.cards), 405)
         self.assertEqual(
             Counter(card["wave"] for card in self.cards),
-            {"A": 45, "B": 24, "C": 141},
+            {"A": 45, "B": 24, "C": 141, "D": 195},
         )
         self.assertEqual(set(card["tense"] for card in self.cards), COMPOUND_TENSES)
         self.assertTrue(all(
@@ -205,7 +205,7 @@ class CompoundPackTests(unittest.TestCase):
     def test_rendered_payload_has_stable_hook(self):
         rendered = generator.render_js(self.cards)
         self.assertIn("const COMPOUND_CARDS=", rendered)
-        self.assertIn("210 compound-tense cards", rendered)
+        self.assertIn("405 compound-tense cards", rendered)
         self.assertIn('"gradedForm":"ai écrit"', rendered)
 
     def test_generated_inline_is_up_to_date(self):
@@ -214,6 +214,34 @@ class CompoundPackTests(unittest.TestCase):
             self.index_text,
             generator.render_inline(self.index_text, generated),
         )
+
+    def test_person_expansion_is_canonical_and_preserves_legacy_cards(self):
+        expanded = [c for c in self.cards if c['wave'] == 'D']
+        self.assertEqual(len(expanded), 195)
+        self.assertEqual(len([c for c in self.cards if c['wave'] != 'D']), 210)
+        # Référence indépendante du moteur : participes relus à l'audit initial.
+        participles = dict(zip(
+            'Parler Finir Acquérir Aller Attendre Avoir Boire Conduire Connaître Courir Craindre Croire Cueillir Devoir Dire Dormir Écrire Être Faire Joindre Lire Mettre Mourir Naître Ouvrir Partir Pouvoir Prendre Recevoir Résoudre Rire Savoir Suivre Tenir Valoir Venir Vivre Voir Vouloir'.split(),
+            'parlé fini acquis allé attendu eu bu conduit connu couru craint cru cueilli dû dit dormi écrit été fait joint lu mis mort né ouvert parti pu pris reçu résolu ri su suivi tenu valu venu vécu vu voulu'.split(),
+        ))
+        forms = {
+            'Passé composé': [['ai','avons','avez'], ['suis','sommes','êtes']],
+            'Plus-que-parfait': [['avais','avions','aviez'], ['étais','étions','étiez']],
+            'Conditionnel passé': [['aurais','aurions','auriez'], ['serais','serions','seriez']],
+            'Futur antérieur': [['aurai','aurons','aurez'], ['serai','serons','serez']],
+            'Subjonctif passé': [['aie','ayons','ayez'], ['sois','soyons','soyez']],
+        }
+        people = ['1re pers. du singulier','1re pers. du pluriel','2e pers. du pluriel']
+        for card in expanded:
+            person = people.index(card['person'])
+            etre = card['verb'] in {'Aller','Venir','Partir','Mourir','Naître'}
+            pp = participles[card['verb']] + ('s' if etre and person > 0 else '')
+            expected = forms[card['tense']][int(etre)][person] + ' ' + pp
+            self.assertEqual(card['gradedForm'], expected, card['id'])
+            if etre:
+                self.assertIn('masculin', card['subjectHint'])
+        pairs = {(c['verb'],c['tense']) for c in expanded}
+        self.assertEqual(len(pairs), 195)
 
 
 if __name__ == "__main__":

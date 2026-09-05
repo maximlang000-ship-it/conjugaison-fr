@@ -10,10 +10,9 @@ SW = (ROOT / "sw.js").read_text(encoding="utf-8")
 
 def function_block(name: str) -> str:
     start = INDEX.index(f"function {name}(")
-    match = re.search(r"^}\s*$", INDEX[start:], flags=re.MULTILINE)
-    if not match:
-        raise AssertionError(f"Fonction {name} introuvable ou incomplète")
-    return INDEX[start : start + match.end()]
+    next_function = re.search(r"\nfunction\s+\w+\(", INDEX[start + 1 :])
+    end = len(INDEX) if not next_function else start + 1 + next_function.start()
+    return INDEX[start:end]
 
 
 class AppStaticBehaviorTests(unittest.TestCase):
@@ -51,20 +50,45 @@ class AppStaticBehaviorTests(unittest.TestCase):
         filtered = function_block("getFilteredCards")
         validate = function_block("validate")
         self.assertIn("if (c.trapTip) return { tip: c.trapTip };", find_piege)
-        self.assertIn("(!piegeOnly || findPiege(c))", filtered)
+        self.assertIn("(!piegeOnly || isTrapCard(c))", filtered)
         self.assertIn("const piege = findPiege(c);", validate)
         self.assertIn("piege.tip", validate)
 
-    def test_compound_cards_show_the_scenario_and_hide_group_drilling(self):
+    def test_quiz_stays_cold_until_the_answer(self):
         show_card = function_block("showCard")
         validate = function_block("validate")
-        self.assertIn('id="q-prompt"', INDEX)
-        self.assertIn('id="q-scenario"', INDEX)
-        self.assertIn("prompt.textContent = c.prompt || '';", show_card)
-        self.assertIn("scenario.textContent = c.scenario || '';", show_card)
+        self.assertNotIn('id="q-prompt"', INDEX)
+        self.assertNotIn('id="q-scenario"', INDEX)
+        self.assertNotIn('id="q-piege-badge"', INDEX)
+        self.assertNotIn("c.prompt", show_card)
+        self.assertNotIn("c.scenario", show_card)
+        self.assertNotIn("findPiege(c)", show_card)
+        self.assertIn("if (c.person)", show_card)
+        self.assertIn("const subject = compoundSubject(c);", show_card)
+        self.assertIn("const codContext = compoundAgreementContext(c);", show_card)
         self.assertIn("const groupDisplay = c.compound ? 'none' : '';", show_card)
         self.assertIn("const groupResultRow = c.compound ? ''", validate)
         self.assertIn("c.compound ? 'none' : ''", validate)
+        self.assertIn("const piege = findPiege(c);", validate)
+        self.assertIn("const _ex = c.scenario", validate)
+        self.assertIn("c.scenario.replace('___', '<b>' + c.gradedForm + '</b>')", validate)
+
+    def test_easy_and_difficult_are_persistent_and_exclusive(self):
+        easy = function_block("toggleEasy")
+        difficult = function_block("toggleDifficult")
+        self.assertIn('id="btn-easy"', INDEX)
+        self.assertIn('id="btn-difficult"', INDEX)
+        self.assertIn("const LS_EASY = 'conjugaison_easy';", INDEX)
+        self.assertIn("easyIds.add(id);", easy)
+        self.assertIn("difficultIds.delete(id);", easy)
+        self.assertIn("saveEasy(easyIds);", easy)
+        self.assertIn("difficultIds.add(id);", difficult)
+        self.assertIn("easyIds.delete(id);", difficult)
+        self.assertIn("saveDifficult(difficultIds);", difficult)
+        result_start = INDEX.index('id="screen-result"')
+        result_end = INDEX.index('id="screen-final"')
+        self.assertLess(result_start, INDEX.index('id="btn-easy"'))
+        self.assertLess(INDEX.index('id="btn-difficult"'), result_end)
 
     def test_compound_tenses_are_available_to_filters(self):
         push = "CARDS.push(...TARGET_CARDS, ...COMPOUND_CARDS);"

@@ -22,7 +22,7 @@ triviaux (« ils mangent → -ent »).
 - **À CHAQUE déploiement, bumper DEUX numéros de version** (sinon le service worker ressert l'ancien cache et le téléphone ne voit rien) :
   1. `sw.js` : `const CACHE = 'conjugaison-vN'` → `vN+1`
   2. `index.html` : `const APP_VERSION = 'vN'` → `vN+1` (affiché en pastille bleue en haut de chaque écran)
-- Version actuelle : **v27**.
+- Version applicative : **v29**. Git utilise ses propres identifiants ; un échec de `gh auth status` ne suffit pas à conclure que le push est bloqué.
 - Depuis v20, un handler `controllerchange` **recharge l'app automatiquement** quand un nouveau SW prend la main → l'utilisateur n'a plus à rouvrir manuellement.
 
 ---
@@ -43,9 +43,9 @@ triviaux (« ils mangent → -ent »).
 
 | Structure | Contenu |
 |-----------|---------|
-| `CARDS` | **1 163 cartes** au runtime : 753 cartes historiques du deck + 200 `TARGET_CARDS` + 210 `COMPOUND_CARDS`. Les clés SRS des 753 cartes historiques restent inchangées. Champs : `verb, group, tense, person, answer, groupName, groupExplain, cardBack`; les packs ciblés ajoutent notamment `id`, `wave` et `trapTip`. |
+| `CARDS` | **1 358 cartes** au runtime : 753 cartes historiques du deck + 200 `TARGET_CARDS` + 405 `COMPOUND_CARDS`. Toutes les 1 163 anciennes identités restent inchangées. |
 | `TARGET_CARDS` | **200 mini-cartes ciblées**, 22 verbes en deux vagues (105 + 95), générées inline depuis `target_verbs_golden.json`. Chaque pack contient 6 à 10 formes vérifiées, pas un paradigme complet. Sa règle pédagogique est copiée dans `trapTip`, ce qui rend toutes les cartes du pack visibles avec le filtre « Pièges fréquents » et dans le feedback existant. |
-| `COMPOUND_CARDS` | **210 cartes scénarisées** en trois vagues (45 + 24 + 141), générées depuis `compound_tenses_golden.json` : passé composé, plus-que-parfait, conditionnel passé, futur antérieur et subjonctif passé. Les 200 couples `40 verbes × 5 temps` sont tous couverts, avec 10 cartes supplémentaires sur les accords. `gradedForm` contient uniquement auxiliaire + participe ; le choix avoir/être n'est pas un objectif dédié. |
+| `COMPOUND_CARDS` | **405 cartes**, vagues A45/B24/C141/D195. Les 200 couples `40 verbes × 5 temps` restent couverts. D ajoute une personne je/nous/vous par couple pour les 39 verbes personnels ; Falloir reste impersonnel. `subjectHint` précise le genre/nombre quand nécessaire, `trapKinds` décrit les critères de piège. Les scénarios ne sont utilisés qu'après réponse. |
 | `EXC` | **45 exceptions** clé `"Verbe\|Temps"` → `{hl:[...], rule}`. `hl` = sous-chaînes à surligner en rouge dans la réponse (radicaux irréguliers, doubles muets, -yi-, dû, PP être…). Sert écran résultat ET Daily. |
 | `PIEGES` | **37 pièges** person-spécifiques (homophones, formes surprenantes). `findPiege(c)` renvoie d'abord le `trapTip` des packs ciblés, puis consulte ce tableau. Affichés dans un encart ambre sur l'écran résultat, **masqués si une `EXC` couvre déjà la carte**. |
 | `VERB_COMPLEMENT` | Complément neutre par verbe (parler→français, boire→de l'eau) pour les phrases-repères. 40 verbes du quiz. |
@@ -64,7 +64,7 @@ Pouvoir-Impératif n'existe pas (exclu). Formes non-personnelles : person = `''`
 - **screen-select (menu)** : stats points faibles (par temps/verbe), **session de répétition espacée** (Leitner : compteurs dû/nouvelles, tailles 10/20/30/Tout), filtres temps/verbe/groupe/difficile/piège, bloc **☁️ Synchronisation**, **mémo des temps** repliable, boutons `📅 Ma routine du jour` et `📖 Fiche révision`.
 - **screen-daily** (`showDaily`/`renderDaily`) : routine de **rappel actif** : écrire de mémoire, révéler, comparer, cacher puis réécrire uniquement les formes ratées. Verbe du jour tiré du `DAILY_POOL` (40 = 13 verbes deck avec EXC + 27 `DAILY_VERBS`), tournant par `_dayIndex()`. Réponses **cachées** (amorces « je … ») jusqu'au bouton « 👁 Voir les réponses ». Rappel des pièges muets niveau natif. Streak 🔥 (`markDailyDone`).
 - **screen-fiche** (`showFiche`) : **concordance des temps, contenu 100 % statique** (6 sections : subjonctif vs indicatif + piège certain/incertain ; double subjonctif ; subjonctif après toute principale ; hypothèse « si » ; futur dans le passé ; tableau discours indirect).
-- **screen-quiz** (`showCard`/`validate`) : question (verbe + temps + personne), ou scénario à compléter pour un temps composé ; choix facultatif du groupe sur les cartes simples, saisie + boutons d'accents, panneau Aide. Le texte seul active Valider/Entrée. Champ `#answer-input` a un **anti-autocorrection** (`onbeforeinput` bloque `insertReplacementText`).
+- **screen-quiz** (`showCard`/`validate`) : format unique **verbe + temps + personne**, pour les formes simples comme composées. **Jamais de phrase à trous, d'exemple de conjugaison dans le champ ni de badge piège/difficile avant la réponse.** Les temps composés précisent seulement le sujet et la contrainte d'accord indispensable (COD antéposé), sans phrase. Les scénarios complétés sont réservés à la correction. Choix facultatif du groupe sur les cartes simples, saisie + boutons d'accents, panneau Aide volontaire. Le texte seul active Valider/Entrée. Champ `#answer-input` a un **anti-autocorrection** (`onbeforeinput` bloque `insertReplacementText`).
 - **Notation du quiz** : seule la forme verbale est comptabilisée. Pour une forme simple, elle est cherchée comme mot Unicode exact dans toute la saisie ; amorce/pronom, négation, ponctuation, complément et choix du groupe ne pénalisent pas (`que ts ailles`, `que tu n'ailles pas` et `que tu ailles.` valident tous `ailles`; `aille` reste faux). Pour un temps composé, `gradedForm` vérifie auxiliaire + participe + accord, tout en ignorant le sujet, le contexte, les négations et des adverbes usuels ; `a écrit`, `avait écrit` et `aurait écrit` restent donc distincts. Le choix du groupe est masqué sur ces cartes.
 - **screen-result** : badge correct/incorrect avec réponse **surlignée en rouge** sur la partie exception, encart Exception (EXC) ou Piège (PIEGES), **phrase-repère** (buildExample), 3 boutons TTS, verso Anki.
 - **screen-final** : score, cartes ratées, difficiles.
@@ -76,9 +76,16 @@ Pouvoir-Impératif n'existe pas (exclu). Formes non-personnelles : person = `''`
 
 ## 5. localStorage (par origine — repart de zéro si l'URL change)
 
+Depuis v29, `learning.js` gère le calcul des échéances et la sauvegarde complète JSON. Le score dépend toujours uniquement de la conjugaison. Une réponse aidée est repérée même après fermeture de l'aide et revient sous 1 jour ; une erreur sous 10 minutes. Facile accélère de deux boîtes, Difficile ramène au maximum à la boîte 1 / 1 jour. Une répétition dans les 24 h n'augmente pas la boîte. Reclasser une réponse ne recompte jamais les statistiques. Les marquages personnels persistants sont appliqués aux prochaines réponses ; Facile ne transforme jamais une erreur en réussite.
+
+Le filtre Difficiles utilise `isDifficultCard` : union des formes-pièges (`isTrapCard`) et des marquages personnels. Facile retire le marquage personnel Difficile, sans effacer le caractère linguistiquement piégeux de la forme. Les conseils `trapTip` sont indépendants de la classification des temps composés.
+
+Exporter/Importer sauvegarde stats, échéances SRS, marquages et routine. Validation stricte avant import, confirmation de remplacement dans l'interface, copie de récupération dans `conjugaison_before_restore` et rollback en cas d'erreur d'écriture. L'identité de l'appareil et la configuration Google ne sont pas remplacées. Google reste une synchronisation de stats uniquement.
+
 | Clé | Contenu |
 |-----|---------|
 | `conjugaison_difficult` | Set des cartes marquées difficiles |
+| `conjugaison_easy` | Set des cartes marquées faciles, exclusif des marquages difficiles |
 | `conjugaison_stats` | `{tense:{...}, verb:{...}}` avec `{ok,n}` — agrégé, PAS par carte |
 | `conjugaison_srs` | Boîtes de Leitner **par carte** `{box,seen,ok,last,due}` |
 | `conjugaison_daily` | `{last:'YYYY-M-D', streak:N}` |
@@ -106,6 +113,9 @@ Régénérer les données au lieu de taper des formes à la main.
 - [gen_daily_verbs.py](gen_daily_verbs.py) : conjugue une liste `POOL` de verbes-pièges avec **verbecc** → `daily_verbs.js` (= `const DAILY_VERBS`), à **recoller** dans index.html. Setup : `pip install verbecc tzdata`. API : `from verbecc import CompleteConjugator; CompleteConjugator(lang='fr').conjugate(v)` puis `json.loads(str(r))`. **Vérifier chaque forme** — verbecc s'est trompé sur `haïr` (« j'hais »), retiré. Étendre le pool = ajouter une ligne (verbe → group, trap tense, hl, rule) et relancer.
 - [gen_extra_packs.py](gen_extra_packs.py) : valide `target_verbs_golden.json` puis régénère le bloc inline `TARGET_CARDS` dans `index.html`. `--check` vérifie que l'inline est à jour ; `--verify-verbecc` fait un contrôle croisé sans remplacer le golden. Les six formes personnelles de `falloir`, absentes de verbecc 2.0.2, sont une divergence déclarée et restent fondées sur Le Robert/Académie.
 - [gen_compound_packs.py](gen_compound_packs.py) : valide `compound_tenses_golden.json` et régénère le bloc inline `COMPOUND_CARDS`. `--check-index` contrôle l'inline et `--write-index` le met à jour. Les formes sont relues et sourcées Académie française/OQLF.
+- [gen_compound_persons.py](gen_compound_persons.py) : génère D avec verbecc ; `--check` compare les 195 formes au moteur. Dépendances locales `.tmp/verbdeps_local` + `.tmp/verbdeps`. Les tests contrôlent aussi les auxiliaires et participes sur une référence indépendante relue.
+
+Vérifications : `python -B -m unittest discover`, les trois checks de générateurs, `node test_input_matching.js`, `node test_quiz_format.js`, `node test_learning.js`, `node test_app_flow.js`. Les deux derniers contrôlent sauvegarde/restitution/rollback et le parcours JavaScript complet avec DOM simulé ; ils ne remplacent pas une vérification visuelle sur téléphone.
 - Historiquement, les modifs d'index.html ont été faites via des scripts Python `patch_*.py` (remplacements de chaînes idempotents) puis supprimés. On peut aussi éditer directement.
 
 ---
